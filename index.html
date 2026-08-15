@@ -91,7 +91,7 @@
                 
                 <form id="form-create-pin" onsubmit="App.Auth.handleCreatePin(event)">
                     <div class="form-group mt-4">
-                        <input type="password" id="create-pin-input" placeholder="••••" required pattern="[0-9]{4,6}" inputmode="numeric" class="input-pin text-center">
+                        <input type="tel" id="create-pin-input" placeholder="••••" required pattern="[0-9]{4,6}" inputmode="numeric" class="input-pin text-center">
                     </div>
                     <button type="submit" class="btn-primary mt-4 btn-auth-submit">Selesai & Masuk</button>
                 </form>
@@ -102,14 +102,16 @@
         <div id="screen-login" class="screen-panel">
             <div class="auth-card">
                 <div class="auth-header">
-                    <div class="auth-logo"><i class="ph-fill ph-shield-check"></i></div>
+                    <div class="mb-3" style="display:flex; align-items:center; justify-content:center; width: 80px; height: 80px; border-radius: 24px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4); margin: 0 auto;">
+                        <i class="ph-fill ph-wallet" style="font-size: 40px; color: #fff;"></i>
+                    </div>
                     <h2 id="login-greeting">Selamat Datang,</h2>
                     <p class="text-muted">Masukkan PIN Anda.</p>
                 </div>
                 
                 <form id="form-login" onsubmit="App.Auth.handleLogin(event)">
                     <div class="form-group mt-4">
-                        <input type="password" id="login-pin-input" placeholder="••••" required pattern="[0-9]{4,6}" inputmode="numeric" class="input-pin text-center">
+                        <input type="tel" id="login-pin-input" placeholder="••••" required pattern="[0-9]{4,6}" inputmode="numeric" class="input-pin text-center">
                     </div>
                     <button type="submit" class="btn-primary mt-4 btn-auth-submit">Masuk ke Dasbor</button>
                     
@@ -339,11 +341,10 @@
                     </div>
                     <div id="subs-list" class="mb-4"></div>
                     
-                    <div class="info-card mt-4 flex-column">
-                        <div class="flex-between w-100 mb-2"><span>Rasio Kas Tunai:</span><strong id="wallet-ratio-tunai">0%</strong></div>
-                        <div class="progress-bar-bg w-100"><div class="progress-bar-fill bg-success" id="wallet-progress-tunai"></div></div>
-                        <p class="text-xs text-muted mt-2"><strong>Info:</strong> Menunjukkan persentase uang fisik (Tunai) terhadap total aset Anda.</p>
+                    <div class="section-header mt-4">
+                        <h3>Analisis Aset</h3>
                     </div>
+                    <div id="wallet-insights"></div>
                 </section>
 
                 <!-- HISTORY VIEW -->
