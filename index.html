@@ -91,7 +91,7 @@
                 
                 <form id="form-create-pin" onsubmit="App.Auth.handleCreatePin(event)">
                     <div class="form-group mt-4">
-                        <input type="tel" id="create-pin-input" placeholder="••••" required pattern="[0-9]{4,6}" inputmode="numeric" class="input-pin text-center">
+                        <input type="number" id="create-pin-input" placeholder="••••" required pattern="[0-9]{4,6}" inputmode="numeric" class="input-pin text-center">
                     </div>
                     <button type="submit" class="btn-primary mt-4 btn-auth-submit">Selesai & Masuk</button>
                 </form>
@@ -111,7 +111,7 @@
                 
                 <form id="form-login" onsubmit="App.Auth.handleLogin(event)">
                     <div class="form-group mt-4">
-                        <input type="tel" id="login-pin-input" placeholder="••••" required pattern="[0-9]{4,6}" inputmode="numeric" class="input-pin text-center">
+                        <input type="number" id="login-pin-input" placeholder="••••" required pattern="[0-9]{4,6}" inputmode="numeric" class="input-pin text-center">
                     </div>
                     <button type="submit" class="btn-primary mt-4 btn-auth-submit">Masuk ke Dasbor</button>
                     
@@ -200,7 +200,7 @@
                                 <h4>Sisa Anggaran</h4>
                                 <p class="text-sm text-muted" id="budget-info">Klik untuk mengatur batas anggaran</p>
                             </div>
-                            <h4 id="budget-left">Rp 0</h4>
+                            <div class="text-right"><h4 id="budget-left">Rp 0</h4><div id="budget-percentage" class="mt-1" style="font-size:12px; font-weight:bold; background:var(--primary-10); color:var(--primary); padding:4px 8px; border-radius:12px; display:inline-block;">Terpakai 0%</div></div>
                         </div>
                         <div class="progress-bar-bg">
                             <div class="progress-bar-fill" id="budget-progress"></div>
@@ -458,7 +458,13 @@
         <div class="sheet-body">
 
             <form onsubmit="App.Transactions.add(event, 'expense')">
-                <div class="form-group flex-between align-center"><input type="text" class="input-money text-danger w-100" id="exp-amount" placeholder="Rp 0" required oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group mb-3">
+                    <label>Nominal Pengeluaran</label>
+                    <div style="display:flex; align-items:center; border-bottom:2px solid var(--danger); padding-bottom:8px;">
+                        <span class="text-xl font-weight-bold mr-2 text-danger" style="opacity:0.8">Rp</span>
+                        <input type="number" id="exp-amount" class="w-100 text-danger" style="border:none; outline:none; font-size:28px; font-weight:800; background:transparent; padding:0; margin:0;" placeholder="0" required>
+                    </div>
+                </div>
                 <div class="form-group"><label>Keterangan</label><input type="text" id="exp-note" placeholder="Cth: Makan Siang" required oninput="App.ML.predictCategory(this.value)"></div>
                 <div class="form-row"><div class="form-group w-50"><label>Kategori <span id="ai-badge" class="badge-ai" style="display:none;">AI</span></label><select id="exp-category" required></select></div><div class="form-group w-50"><label>Ambil Dari</label><select id="exp-wallet" required><option value="tunai">Tunai</option><option value="bank">Bank/E-Wallet</option></select></div></div>
                 <div class="form-row"><div class="form-group w-50"><label>Tanggal</label><input type="date" id="exp-date" required></div><div class="form-group w-50"><label>Jam</label><input type="time" id="exp-time" required></div></div>
@@ -473,7 +479,13 @@
         <div class="sheet-body">
 
             <form onsubmit="App.Transactions.add(event, 'income')">
-                <div class="form-group"><input type="text" class="input-money text-success" id="inc-amount" placeholder="Rp 0" required oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group mb-3">
+                    <label>Nominal Pemasukan</label>
+                    <div style="display:flex; align-items:center; border-bottom:2px solid var(--success); padding-bottom:8px;">
+                        <span class="text-xl font-weight-bold mr-2 text-success" style="opacity:0.8">Rp</span>
+                        <input type="number" id="inc-amount" class="w-100 text-success" style="border:none; outline:none; font-size:28px; font-weight:800; background:transparent; padding:0; margin:0;" placeholder="0" required>
+                    </div>
+                </div>
                 <div class="form-group"><label>Sumber Pemasukan (Keterangan)</label><input type="text" id="inc-note" required></div>
                 <div class="form-group"><label>Masuk Ke Dompet</label><select id="inc-wallet" required><option value="bank">Bank/E-Wallet</option><option value="tunai">Tunai</option></select></div>
                 <div class="form-row"><div class="form-group w-50"><label>Tanggal</label><input type="date" id="inc-date" required></div><div class="form-group w-50"><label>Jam</label><input type="time" id="inc-time" required></div></div>
@@ -487,7 +499,13 @@
         <div class="sheet-body">
 
             <form onsubmit="App.Transactions.transfer(event)">
-                <div class="form-group"><input type="text" class="input-money text-primary" id="trf-amount" placeholder="Rp 0" required oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group mb-3">
+                    <label>Nominal Mutasi</label>
+                    <div style="display:flex; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:8px;">
+                        <span class="text-xl font-weight-bold mr-2 text-primary" style="opacity:0.8">Rp</span>
+                        <input type="number" id="trf-amount" class="w-100 text-primary" style="border:none; outline:none; font-size:28px; font-weight:800; background:transparent; padding:0; margin:0;" placeholder="0" required>
+                    </div>
+                </div>
                 <div class="form-row align-center"><div class="form-group w-40"><label>Dari</label><select id="trf-from" required><option value="bank">Bank/E-Wallet</option><option value="tunai">Tunai</option></select></div><div class="w-20 text-center"><i class="ph-bold ph-arrow-right text-primary text-xl"></i></div><div class="form-group w-40"><label>Ke</label><select id="trf-to" required><option value="tunai">Tunai</option><option value="bank">Bank/E-Wallet</option></select></div></div>
                 <button type="submit" class="btn-primary mt-4">Proses Mutasi</button>
             </form>
@@ -499,8 +517,8 @@
         <div class="sheet-body">
             <form onsubmit="App.Goals.add(event)">
                 <div class="form-group"><label>Nama Target (Cth: Beli Motor)</label><input type="text" id="goal-name" required></div>
-                <div class="form-group"><label>Nominal Target (Rp)</label><input type="text" id="goal-target" required oninput="App.UI.formatMoneyInput(this)"></div>
-                <div class="form-group"><label>Saldo Awal Saat Ini</label><input type="text" id="goal-current" placeholder="Rp 0" oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group"><label>Nominal Target (Rp)</label><input type="number" id="goal-target" required ></div>
+                <div class="form-group"><label>Saldo Awal Saat Ini</label><input type="number" id="goal-current" placeholder="Rp 0" ></div>
                 <button type="submit" class="btn-primary mt-2">Buat Target</button>
             </form>
         </div>
@@ -512,7 +530,7 @@
             <form onsubmit="App.Goals.addFunds(event)">
                 <input type="hidden" id="goal-fund-id">
                 <div class="form-group"><label>Sumber Dana</label><select id="goal-fund-wallet" required><option value="bank">Bank/E-Wallet</option><option value="tunai">Tunai</option></select></div>
-                <div class="form-group"><label>Nominal Ditabung</label><input type="text" class="input-money text-success" id="goal-fund-amount" required oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group"><label>Nominal Ditabung</label><input type="number" class="input-money text-success" id="goal-fund-amount" required ></div>
                 <button type="submit" class="btn-primary mt-2">Konfirmasi Simpanan</button>
             </form>
         </div>
@@ -523,7 +541,7 @@
         <div class="sheet-body">
             <form onsubmit="App.Subs.add(event)">
                 <div class="form-group"><label>Nama Tagihan (Cth: Uang Kos)</label><input type="text" id="sub-name" required></div>
-                <div class="form-group"><label>Nominal (Rp)</label><input type="text" id="sub-amount" required oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group"><label>Nominal (Rp)</label><input type="number" id="sub-amount" required ></div>
                 <div class="form-row"><div class="form-group w-50"><label>Tgl Bayar (1-31)</label><input type="number" id="sub-date" min="1" max="31" required></div><div class="form-group w-50"><label>Otomatis Potong</label><select id="sub-wallet" required><option value="bank">Bank</option><option value="tunai">Tunai</option></select></div></div>
                 <button type="submit" class="btn-primary mt-2">Simpan Jadwal</button>
             </form>
@@ -534,7 +552,13 @@
         <div class="sheet-header"><h3>Atur Batas Anggaran</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i class="ph-bold ph-x"></i></button></div>
         <div class="sheet-body">
             <form onsubmit="App.Budget.save(event)">
-                <div class="form-group"><input type="text" class="input-money text-primary" id="budget-amount" placeholder="Rp 0" required oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group mb-3">
+                    <label>Batas Maksimal Bulanan</label>
+                    <div style="display:flex; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:8px;">
+                        <span class="text-xl font-weight-bold mr-2 text-primary" style="opacity:0.8">Rp</span>
+                        <input type="number" id="budget-amount" class="w-100 text-primary" style="border:none; outline:none; font-size:28px; font-weight:800; background:transparent; padding:0; margin:0;" placeholder="0" required>
+                    </div>
+                </div>
                 <button type="submit" class="btn-primary mt-2">Terapkan Batasan</button>
                 <button type="button" class="btn-secondary mt-2 w-100" onclick="App.Budget.reset()">Hapus Anggaran</button>
             </form>
@@ -547,7 +571,7 @@
             <form onsubmit="App.Export.exportPDF(event)">
                 <div class="form-row"><div class="form-group w-50"><label>Bulan Laporan</label><select id="pdf-month" required></select></div><div class="form-group w-50"><label>Tahun</label><select id="pdf-year" required></select></div></div>
                 <div class="form-group"><label>Judul Laporan</label><input type="text" id="pdf-title" required></div>
-                <div class="form-group"><label>Saldo Awal Bulan (Rp)</label><input type="text" id="pdf-saldo" required oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group"><label>Saldo Awal Bulan (Rp)</label><input type="number" id="pdf-saldo" required ></div>
                 <button type="submit" class="btn-primary mt-2">Unduh PDF</button>
             </form>
         </div>
