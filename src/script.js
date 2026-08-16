@@ -271,6 +271,20 @@ const App = (() => {
         openSheet(id) {
             document.getElementById('overlay').classList.add('show');
             document.getElementById(id).classList.add('show');
+            
+            if (id === 'sheet-add-expense' || id === 'sheet-add-income') {
+                const now = new Date();
+                const d = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+                const t = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+                if(id === 'sheet-add-expense') { 
+                    const dEl = document.getElementById('exp-date'); if(dEl && !dEl.value) dEl.value = d; 
+                    const tEl = document.getElementById('exp-time'); if(tEl && !tEl.value) tEl.value = t; 
+                }
+                if(id === 'sheet-add-income') { 
+                    const dEl = document.getElementById('inc-date'); if(dEl && !dEl.value) dEl.value = d; 
+                    const tEl = document.getElementById('inc-time'); if(tEl && !tEl.value) tEl.value = t; 
+                }
+            }
         },
         closeAllSheets() {
             document.getElementById('overlay').classList.remove('show');
