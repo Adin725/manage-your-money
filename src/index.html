@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <!-- Prevent zoom on input focus for mobile (user-scalable=no) -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mumy Finance</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
@@ -17,9 +20,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="light-theme">
 
     <div id="master-wrapper">
@@ -28,7 +33,7 @@
             <div class="mesh-bg-blob blob-2"></div>
             <div class="mesh-bg-blob blob-3"></div>
         </div>
-        
+
         <!-- ONBOARDING SCREEN -->
         <div id="screen-onboarding" class="screen-panel">
             <div class="geometric-header">
@@ -41,11 +46,13 @@
             <div class="onboarding-content">
                 <p class="text-muted mb-2">Selamat Datang di</p>
                 <h1 class="onboarding-title">Mumy Finance</h1>
-                <p class="onboarding-desc mt-4">Asisten finansial cerdas Anda. Kelola keuangan lebih rapi, presisi, dan terstruktur.</p>
-                
+                <p class="onboarding-desc mt-4">Asisten finansial cerdas Anda. Kelola keuangan lebih rapi, presisi, dan
+                    terstruktur.</p>
+
                 <div class="w-100 mt-4" style="display: flex; gap: 12px;">
                     <button class="btn-onboarding w-50" onclick="App.Auth.navTo('screen-login')">Masuk</button>
-                    <button class="btn-onboarding-primary w-50" onclick="App.Auth.navTo('screen-register-profile')">Daftar Akun</button>
+                    <button class="btn-onboarding-primary w-50"
+                        onclick="App.Auth.navTo('screen-register-profile')">Daftar Akun</button>
                 </div>
             </div>
         </div>
@@ -54,11 +61,12 @@
         <div id="screen-register-profile" class="screen-panel">
             <div class="auth-card">
                 <div class="auth-header text-left mb-4">
-                    <button class="btn-icon-small mb-4" onclick="App.Auth.navTo('screen-onboarding')"><i class="ph-bold ph-arrow-left"></i></button>
+                    <button class="btn-icon-small mb-4" onclick="App.Auth.navTo('screen-onboarding')"><i
+                            class="ph-bold ph-arrow-left"></i></button>
                     <h2>Registrasi</h2>
                     <p class="text-muted mt-2">Lengkapi identitas Anda untuk melanjutkan.</p>
                 </div>
-                
+
                 <form id="form-profile" onsubmit="App.Auth.handleRegisterProfile(event)">
                     <div class="form-group text-left">
                         <label>Nama Panggilan</label>
@@ -72,7 +80,8 @@
                         <label>Tanggal Lahir</label>
                         <input type="date" id="reg-dob" required>
                     </div>
-                    <button type="submit" class="btn-primary mt-4 btn-auth-submit">Lanjut Buat PIN <i class="ph-bold ph-arrow-right"></i></button>
+                    <button type="submit" class="btn-primary mt-4 btn-auth-submit">Lanjut Buat PIN <i
+                            class="ph-bold ph-arrow-right"></i></button>
                 </form>
             </div>
         </div>
@@ -81,14 +90,16 @@
         <div id="screen-register-pin" class="screen-panel">
             <div class="auth-card">
                 <div class="auth-header text-left mb-4">
-                    <button class="btn-icon-small mb-4" onclick="App.Auth.navTo('screen-register-profile')"><i class="ph-bold ph-arrow-left"></i></button>
+                    <button class="btn-icon-small mb-4" onclick="App.Auth.navTo('screen-register-profile')"><i
+                            class="ph-bold ph-arrow-left"></i></button>
                     <h2>Keamanan Akses</h2>
                     <p class="text-muted mt-2">Buat PIN (4-6 digit) untuk melindungi privasi data Anda.</p>
                 </div>
-                
+
                 <form id="form-create-pin" onsubmit="App.Auth.handleCreatePin(event)">
                     <div class="form-group mt-4">
-                        <input type="password" id="create-pin-input" placeholder="••••" required pattern="[0-9]{4,6}" inputmode="numeric" class="input-pin text-center">
+                        <input type="password" id="create-pin-input" placeholder="••••" required pattern="[0-9]{4,6}"
+                            inputmode="numeric" class="input-pin text-center">
                     </div>
                     <button type="submit" class="btn-primary mt-4 btn-auth-submit">Selesai & Masuk</button>
                 </form>
@@ -103,14 +114,16 @@
                     <h2 id="login-greeting">Selamat Datang,</h2>
                     <p class="text-muted">Masukkan PIN Anda.</p>
                 </div>
-                
+
                 <form id="form-login" onsubmit="App.Auth.handleLogin(event)">
                     <div class="form-group mt-4">
-                        <input type="password" id="login-pin-input" placeholder="••••" required pattern="[0-9]{4,6}" inputmode="numeric" class="input-pin text-center">
+                        <input type="password" id="login-pin-input" placeholder="••••" required pattern="[0-9]{4,6}"
+                            inputmode="numeric" class="input-pin text-center">
                     </div>
                     <button type="submit" class="btn-primary mt-4 btn-auth-submit">Masuk ke Dasbor</button>
-                    
-                    <button type="button" class="btn-text mt-4" id="btn-login-back" onclick="App.Auth.navTo('screen-onboarding')" style="display: none;">Kembali</button>
+
+                    <button type="button" class="btn-text mt-4" id="btn-login-back"
+                        onclick="App.Auth.navTo('screen-onboarding')" style="display: none;">Kembali</button>
                 </form>
             </div>
         </div>
@@ -119,7 +132,7 @@
         <div id="screen-story" class="screen-panel">
             <div class="story-container">
                 <div class="speech-bubble" id="story-bubble">Halo! Aku Mumy, asisten keuanganmu! ✨</div>
-                
+
                 <div class="mascot-wrapper">
                     <!-- Pure CSS Mascot (Foku inspired) -->
                     <div class="mascot">
@@ -141,7 +154,8 @@
                 </div>
 
                 <div class="story-action mt-4">
-                    <button class="btn-primary w-100" id="btn-story-next" onclick="App.Story.next()">Lanjut <i class="ph-bold ph-arrow-right"></i></button>
+                    <button class="btn-primary w-100" id="btn-story-next" onclick="App.Story.next()">Lanjut <i
+                            class="ph-bold ph-arrow-right"></i></button>
                 </div>
             </div>
         </div>
@@ -150,7 +164,8 @@
         <div id="screen-app" class="screen-panel app-container">
             <header class="app-header">
                 <div class="user-info">
-                    <div class="avatar" onclick="App.UI.openSheet('sheet-profile-photo')" style="cursor:pointer; position:relative;">
+                    <div class="avatar" onclick="App.UI.openSheet('sheet-profile-photo')"
+                        style="cursor:pointer; position:relative;">
                         <img src="" id="header-avatar" alt="User">
                         <div class="avatar-edit-overlay"><i class="ph-fill ph-camera"></i></div>
                     </div>
@@ -167,19 +182,36 @@
             <div class="view-container">
                 <!-- HOME VIEW -->
                 <section id="view-home" class="view active">
-                    
-                    <div class="balance-card mt-0">
-                        <div class="card-top">
-                            <span class="card-label">Total Saldo Aktif</span>
-                            <i class="ph-fill ph-sim-card"></i>
+
+                    <div class="flip-card-container mt-0" onclick="this.classList.toggle('flipped')">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <div class="card-top">
+                                    <span class="card-label">Total Saldo Aktif</span>
+                                    <i class="ph-fill ph-sim-card"></i>
+                                </div>
+                                <h2 class="card-balance" id="home-total-balance">Rp 0</h2>
+                                <p class="text-sm text-white opacity-70 mt-2">Ketuk untuk detail saldo</p>
+                                <div class="circle circle-1 floating-slow"></div>
+                                <div class="circle circle-2 floating-fast"></div>
+                            </div>
+                            <div class="flip-card-back">
+                                <div class="card-top">
+                                    <span class="card-label">Rincian Saldo</span>
+                                    <i class="ph-fill ph-receipt"></i>
+                                </div>
+                                <div class="mt-4 flex-between border-bottom pb-2" style="border-bottom: 1px solid rgba(255,255,255,0.2);">
+                                    <span class="text-white">Bank / E-Wallet</span>
+                                    <strong id="home-bank-balance" class="text-white">Rp 0</strong>
+                                </div>
+                                <div class="mt-2 flex-between">
+                                    <span class="text-white">Tunai Fisik</span>
+                                    <strong id="home-cash-balance" class="text-white">Rp 0</strong>
+                                </div>
+                                <div class="circle circle-1 floating-slow"></div>
+                                <div class="circle circle-2 floating-fast"></div>
+                            </div>
                         </div>
-                        <h2 class="card-balance" id="home-total-balance">Rp 0</h2>
-                        <div class="card-bottom">
-                            <div class="card-number">**** **** **** 2026</div>
-                            <div class="card-number">**** **** **** 2026</div>
-                        </div>
-                        <div class="circle circle-1 floating-slow"></div>
-                        <div class="circle circle-2 floating-fast"></div>
                     </div>
 
                     <div class="budget-widget mt-4" onclick="App.UI.openSheet('sheet-budget')">
@@ -188,9 +220,12 @@
                                 <h4>Sisa Anggaran</h4>
                                 <p class="text-sm text-muted" id="budget-info">Klik untuk mengatur batas anggaran</p>
                             </div>
-                            <h4 id="budget-left">Rp 0</h4>
+                            <div style="text-align: right;">
+                                <h4 id="budget-left">Rp 0</h4>
+                                <span class="text-xs font-weight-bold" id="budget-pct" style="color: var(--text-muted); background: var(--bg-color); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px;">0% Terpakai</span>
+                            </div>
                         </div>
-                        <div class="progress-bar-bg">
+                        <div class="progress-bar-bg mt-2">
                             <div class="progress-bar-fill" id="budget-progress"></div>
                         </div>
                     </div>
@@ -230,36 +265,47 @@
                         <button class="seg-btn" onclick="App.Analytics.switchTab('kategori')">Alokasi</button>
                         <button class="seg-btn" onclick="App.Analytics.switchTab('anomali')">Anomali</button>
                         <button class="seg-btn" onclick="App.Analytics.switchTab('prediksi')">Prediksi</button>
-                        <button class="seg-btn" onclick="App.Analytics.switchTab('rapor')">Rapor AI</button>
+                        <button class="seg-btn" onclick="App.Analytics.switchTab('rapor')">Ringkasan Pengeluaran</button>
                     </div>
 
-                    <div class="mb-4 text-center">
-                        <button class="btn-primary" style="background: var(--warning); color: #000;" onclick="App.Data.generateDummyData()">
-                            <i class="ph-bold ph-magic-wand"></i> Injeksi Data Uji Coba (Dummy)
-                        </button>
-                    </div>
-
-                    <div id="tab-harian" class="analytics-tab active">
+                    <div id="tab-harian" class="analytics-tab active mt-4">
                         <div class="chart-card">
                             <div class="section-header">
                                 <h4 id="chart-dynamic-title">Tren Arus Kas</h4>
-                                <button class="btn-icon-small" onclick="App.UI.fullscreenChart('chart-harian')"><i class="ph ph-corners-out"></i></button>
+                                <button class="btn-icon-small" onclick="App.UI.fullscreenChart('chart-harian')"><i
+                                        class="ph ph-corners-out"></i></button>
                             </div>
-                            
+
                             <div class="time-filter-row mb-4">
-                                <button class="time-btn" onclick="App.Analytics.renderDynamicChart('hari')">Harian</button>
-                                <button class="time-btn active" onclick="App.Analytics.renderDynamicChart('minggu')">Mingguan</button>
-                                <button class="time-btn" onclick="App.Analytics.renderDynamicChart('bulan')">Bulanan</button>
-                                <button class="time-btn" onclick="App.Analytics.renderDynamicChart('tahun')">Tahunan</button>
+                                <button class="time-btn"
+                                    onclick="App.Analytics.renderDynamicChart('hari')">Harian</button>
+                                <button class="time-btn active"
+                                    onclick="App.Analytics.renderDynamicChart('minggu')">Mingguan</button>
+                                <button class="time-btn"
+                                    onclick="App.Analytics.renderDynamicChart('bulan')">Bulanan</button>
+                                <button class="time-btn"
+                                    onclick="App.Analytics.renderDynamicChart('tahun')">Tahunan</button>
                             </div>
-                            
+
                             <div class="chart-wrapper"><canvas id="chart-harian"></canvas></div>
                         </div>
                         <div class="stats-grid mt-4">
-                            <div class="stat-box"><p>Total</p><h4 id="stat-dyn-total" class="text-primary">Rp 0</h4></div>
-                            <div class="stat-box"><p>Rata-rata</p><h4 id="stat-dyn-avg" class="text-warning">Rp 0</h4></div>
-                            <div class="stat-box"><p>Tertinggi</p><h4 id="stat-dyn-max" class="text-danger">-</h4></div>
-                            <div class="stat-box"><p>Terendah</p><h4 id="stat-dyn-min" class="text-success">-</h4></div>
+                            <div class="stat-box">
+                                <p>Total</p>
+                                <h4 id="stat-dyn-total" class="text-primary">Rp 0</h4>
+                            </div>
+                            <div class="stat-box">
+                                <p>Rata-rata</p>
+                                <h4 id="stat-dyn-avg" class="text-warning">Rp 0</h4>
+                            </div>
+                            <div class="stat-box">
+                                <p id="label-dyn-max">Tertinggi</p>
+                                <h4 id="stat-dyn-max" class="text-danger">-</h4>
+                            </div>
+                            <div class="stat-box">
+                                <p id="label-dyn-min">Terendah</p>
+                                <h4 id="stat-dyn-min" class="text-success">-</h4>
+                            </div>
                         </div>
                     </div>
 
@@ -267,10 +313,11 @@
                         <div class="chart-card">
                             <div class="section-header">
                                 <h4>Komposisi Kategori</h4>
+                                <button class="btn-icon-small" onclick="App.UI.fullscreenChart('chart-kategori')"><i class="ph ph-corners-out"></i></button>
                             </div>
                             <div class="chart-wrapper"><canvas id="chart-kategori"></canvas></div>
                         </div>
-                        <ul class="activity-list mt-4" id="list-kategori-breakdown"></ul>
+                        <div id="list-kategori-breakdown"></div>
                     </div>
 
                     <div id="tab-anomali" class="analytics-tab">
@@ -279,9 +326,15 @@
                             <p><strong>Deteksi Anomali AI:</strong> Memantau pengeluaran tak wajar secara otomatis.</p>
                         </div>
                         <div class="form-group mb-4">
-                            <select id="anomali-filter" class="w-100" onchange="App.Analytics.renderAnomali()"><option value="semua">Semua Kategori</option></select>
+                            <select id="anomali-filter" class="w-100" onchange="App.Analytics.renderAnomali()">
+                                <option value="semua">Semua Kategori</option>
+                            </select>
                         </div>
                         <div class="chart-card">
+                            <div class="section-header mb-2" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h4>Grafik Anomali</h4>
+                                <button class="btn-icon-small" onclick="App.UI.fullscreenChart('chart-anomali')"><i class="ph ph-corners-out"></i></button>
+                            </div>
                             <div class="chart-wrapper"><canvas id="chart-anomali"></canvas></div>
                         </div>
                         <div class="mt-4" id="anomali-insights"></div>
@@ -290,18 +343,27 @@
                     <div id="tab-prediksi" class="analytics-tab">
                         <div class="info-card mb-4 glow-effect">
                             <i class="ph-fill ph-trend-up"></i>
-                            <p><strong>Proyeksi Cerdas:</strong> Estimasi tren keuangan aktif menjelang akhir bulan (Tgl 20+).</p>
+                            <p><strong>Proyeksi Cerdas:</strong> Estimasi tren keuangan dihitung berdasarkan riwayat pengeluaran Anda sejauh ini.</p>
                         </div>
-                        <div class="chart-card mt-4"><div class="chart-wrapper"><canvas id="chart-prediksi"></canvas></div></div>
-                        <div class="mt-4 p-3 rounded-lg border border-primary bg-primary-10" id="prediksi-insights"></div>
+                        <div class="chart-card mt-4">
+                            <div class="section-header mb-2" style="display: flex; justify-content: space-between; align-items: center;">
+                                <h4>Proyeksi Pengeluaran</h4>
+                                <button class="btn-icon-small" onclick="App.UI.fullscreenChart('chart-prediksi')"><i class="ph ph-corners-out"></i></button>
+                            </div>
+                            <div class="chart-wrapper"><canvas id="chart-prediksi"></canvas></div>
+                        </div>
+                        <div class="mt-4 p-3 rounded-lg border border-primary bg-primary-10" id="prediksi-insights">
+                        </div>
                     </div>
 
                     <div id="tab-rapor" class="analytics-tab">
                         <div class="section-header">
-                            <h4>Dokumen Rapor AI</h4>
+                            <h4>Ringkasan Pengeluaran Otomatis</h4>
                             <div class="flex-row gap-2">
-                                <select id="rapor-month" class="form-select-sm" onchange="App.Analytics.renderRapor()"></select>
-                                <select id="rapor-year" class="form-select-sm" onchange="App.Analytics.renderRapor()"></select>
+                                <select id="rapor-month" class="form-select-sm"
+                                    onchange="App.Analytics.renderRapor()"></select>
+                                <select id="rapor-year" class="form-select-sm"
+                                    onchange="App.Analytics.renderRapor()"></select>
                             </div>
                         </div>
                         <div id="rapor-content" class="mt-2"></div>
@@ -312,22 +374,62 @@
                 <section id="view-wallet" class="view">
                     <div class="section-header mt-0">
                         <h3>Tabungan Impian</h3>
-                        <button class="btn-icon-small" onclick="App.UI.openSheet('sheet-add-goal')"><i class="ph-bold ph-plus"></i></button>
+                        <button class="btn-icon-small" onclick="App.UI.openSheet('sheet-add-goal')"><i
+                                class="ph-bold ph-plus"></i></button>
                     </div>
                     <div id="goals-list" class="mb-4"></div>
 
                     <div class="section-header mt-4">
                         <h3>Tagihan Rutin</h3>
-                        <button class="btn-icon-small" onclick="App.UI.openSheet('sheet-add-sub')"><i class="ph-bold ph-plus"></i></button>
+                        <button class="btn-icon-small" onclick="App.UI.openSheet('sheet-add-sub')"><i
+                                class="ph-bold ph-plus"></i></button>
                     </div>
                     <div id="subs-list" class="mb-4"></div>
 
-                    <div class="section-header mt-4"><h3>Rincian Aset</h3></div>
-                    <div class="wallet-list" id="wallet-list-full"></div>
+                    <div class="section-header mt-4">
+                        <h3>Analisis Aset</h3>
+                    </div>
                     
-                    <div class="info-card mt-4">
-                        <div class="flex-between w-100"><span>Rasio Kas Tunai:</span><strong id="wallet-ratio-tunai">0%</strong></div>
-                        <div class="progress-bar-bg mt-2"><div class="progress-bar-fill bg-success" id="wallet-progress-tunai"></div></div>
+                    <div class="modern-asset-card mb-3">
+                        <div class="mac-header">
+                            <div class="mac-icon text-success bg-success-light"><i class="ph-bold ph-wallet"></i></div>
+                            <div>
+                                <h4>Laporan Dompet</h4>
+                                <p>Pantau sisa uang tunai Anda</p>
+                            </div>
+                        </div>
+                        <div class="mac-body">
+                            <div class="mac-row">
+                                <span>Total Awal:</span>
+                                <strong id="w-tunai-total" class="text-main">Rp 0</strong>
+                            </div>
+                            <div class="mac-row">
+                                <span>Terpakai (<span id="w-tunai-pct">0</span>%):</span>
+                                <strong class="text-danger" id="w-tunai-spent">- Rp 0</strong>
+                            </div>
+                            <div class="progress-bar-bg my-2">
+                                <div class="progress-bar-fill bg-success" id="w-tunai-bar" style="width: 0%"></div>
+                            </div>
+                            <div class="mac-footer">
+                                <span>Sisa Tunai</span>
+                                <strong class="text-success" id="w-tunai-left">Rp 0</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modern-asset-card mb-4">
+                        <div class="mac-header">
+                            <div class="mac-icon text-primary bg-primary-light"><i class="ph-bold ph-pizza"></i></div>
+                            <div>
+                                <h4>Batas Aman Jajan</h4>
+                                <p>Maksimal hingga akhir bulan</p>
+                            </div>
+                        </div>
+                        <div class="mac-body">
+                            <div class="mac-footer border-0 pt-0">
+                                <h2 class="text-primary mac-big-amount" id="w-safe-daily">Rp 0<span> /hari</span></h2>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -353,9 +455,25 @@
                         <h3 class="profile-name" id="profile-name-large">Pengaturan Akun</h3>
                         <p class="profile-email" id="profile-email-large">Lisensi Premium Aktif</p>
                     </div>
-                    
-                    <div class="settings-group-title">Laporan Data</div>
+
+                    <div class="settings-group-title">PENYIMPANAN PERANGKAT</div>
+                    <div class="settings-menu mb-4" style="padding: 16px;">
+                        <div class="flex-between mb-2">
+                            <span class="text-main font-weight-bold" style="font-size: 0.875rem;">Kapasitas Digunakan:</span>
+                            <span class="text-primary font-weight-bold" style="font-size: 0.875rem;">0.00% (6.5 KB)</span>
+                        </div>
+                        <div class="progress-bar-bg" style="height: 4px; background: rgba(0,0,0,0.05); margin-bottom: 12px;">
+                            <div class="progress-bar-fill bg-primary" style="width: 2%;"></div>
+                        </div>
+                        <p class="text-xs text-muted">Data Anda disimpan secara lokal (Offline). Persentase ini menunjukkan ruang yang terpakai.</p>
+                    </div>
+
+                    <div class="settings-group-title">LAPORAN DATA</div>
                     <div class="settings-menu mb-4">
+                        <button class="setting-item" onclick="App.UI.openSheet('sheet-profile-history'); App.Profile.renderHistory();">
+                            <div class="setting-icon text-main"><i class="ph-bold ph-clock-counter-clockwise"></i></div>
+                            <div class="setting-text">Laporan Histori Bulanan</div><i class="ph ph-caret-right"></i>
+                        </button>
                         <button class="setting-item" onclick="App.UI.openSheet('sheet-export-pdf')">
                             <div class="setting-icon text-danger"><i class="ph-fill ph-file-pdf"></i></div>
                             <div class="setting-text">Cetak Laporan (PDF)</div><i class="ph ph-caret-right"></i>
@@ -366,7 +484,7 @@
                         </button>
                     </div>
 
-                    <div class="settings-group-title">Keamanan & Sistem</div>
+                    <div class="settings-group-title">KEAMANAN & SISTEM</div>
                     <div class="settings-menu mb-4">
                         <button class="setting-item" onclick="App.Data.exportBackup()">
                             <div class="setting-icon text-primary"><i class="ph-bold ph-download-simple"></i></div>
@@ -375,7 +493,8 @@
                         <label class="setting-item">
                             <div class="setting-icon text-warning"><i class="ph-bold ph-upload-simple"></i></div>
                             <div class="setting-text">Restore Database</div>
-                            <input type="file" accept=".json" style="display:none;" onchange="App.Data.importBackup(event)">
+                            <input type="file" accept=".json" style="display:none;"
+                                onchange="App.Data.importBackup(event)">
                         </label>
                         <button class="setting-item" onclick="App.Auth.logout()">
                             <div class="setting-icon text-muted"><i class="ph-bold ph-lock-key"></i></div>
@@ -386,8 +505,14 @@
                             <div class="setting-text text-danger">Reset Semua Data</div>
                         </button>
                     </div>
+
+                    <div class="text-center mt-4 mb-4" style="opacity: 0.6;">
+                        <p class="text-xs font-weight-bold text-main">Manage Your Money v1.0.0</p>
+                        <p class="text-xs text-muted">Dikembangkan oleh Rijaluddin Abdul Ghani.</p>
+                        <p class="text-xs text-muted">© 2026 Hak Cipta Dilindungi.</p>
+                    </div>
                 </section>
-                
+
                 <!-- Spacer for bottom nav -->
                 <div style="height: 120px; width: 100%;"></div>
             </div>
@@ -401,7 +526,8 @@
                     <i class="ph-fill ph-chart-bar"></i><span class="nav-label">Analitik</span>
                 </button>
                 <div class="nav-item-fab">
-                    <button class="fab" onclick="App.UI.openSheet('sheet-add-expense')"><i class="ph-bold ph-plus"></i></button>
+                    <button class="fab" onclick="App.UI.openSheet('sheet-add-expense')"><i
+                            class="ph-bold ph-plus"></i></button>
                 </div>
                 <button class="nav-item" data-target="view-wallet" onclick="App.UI.switchView('view-wallet')">
                     <i class="ph-fill ph-wallet"></i><span class="nav-label">Aset</span>
@@ -416,17 +542,57 @@
     <!-- OVERLAYS & SHEETS -->
     <div class="overlay" id="overlay" onclick="App.UI.closeAllSheets()"></div>
 
-
+    <!-- History Sheet -->
+    <div class="bottom-sheet" id="sheet-profile-history">
+        <div class="sheet-header">
+            <h3>Laporan Histori Bulanan</h3>
+            <button class="btn-close" onclick="App.UI.closeAllSheets()"><i class="ph-bold ph-x"></i></button>
+        </div>
+        <div class="sheet-body">
+            <div class="flex-row gap-2 mb-4">
+                <select id="profile-hist-month" class="form-select-sm flex-fill" onchange="App.Profile.renderHistory()"></select>
+                <select id="profile-hist-year" class="form-select-sm flex-fill" onchange="App.Profile.renderHistory()"></select>
+            </div>
+            <div id="profile-hist-summary" class="mb-4"></div>
+            <div id="profile-hist-donut-wrapper" class="chart-wrapper mb-4" style="height: 200px;">
+                <canvas id="chart-profile-hist"></canvas>
+            </div>
+            <div id="profile-hist-daily-wrapper" class="chart-wrapper mb-4">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <strong class="text-main" style="font-size: 0.9rem;">Grafik Pengeluaran Harian</strong>
+                    <button class="btn-icon-small" onclick="App.UI.fullscreenChart('chart-profile-hist-daily')"><i class="ph ph-corners-out"></i></button>
+                </div>
+                <div style="height: 200px;"><canvas id="chart-profile-hist-daily"></canvas></div>
+            </div>
+        </div>
+    </div>
 
     <div class="bottom-sheet" id="sheet-add-expense">
-        <div class="sheet-header"><h3>Catat Pengeluaran</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i class="ph-bold ph-x"></i></button></div>
+        <div class="sheet-header">
+            <h3>Catat Pengeluaran</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i
+                    class="ph-bold ph-x"></i></button>
+        </div>
         <div class="sheet-body">
 
             <form onsubmit="App.Transactions.add(event, 'expense')">
-                <div class="form-group flex-between align-center"><input type="text" class="input-money text-danger w-100" id="exp-amount" placeholder="Rp 0" required oninput="App.UI.formatMoneyInput(this)"></div>
-                <div class="form-group"><label>Keterangan</label><input type="text" id="exp-note" placeholder="Cth: Makan Siang" required oninput="App.ML.predictCategory(this.value)"></div>
-                <div class="form-row"><div class="form-group w-50"><label>Kategori <span id="ai-badge" class="badge-ai" style="display:none;">AI</span></label><select id="exp-category" required></select></div><div class="form-group w-50"><label>Ambil Dari</label><select id="exp-wallet" required><option value="tunai">Tunai</option><option value="bank">Bank/E-Wallet</option></select></div></div>
-                <div class="form-row"><div class="form-group w-50"><label>Tanggal</label><input type="date" id="exp-date" required></div><div class="form-group w-50"><label>Jam</label><input type="time" id="exp-time" required></div></div>
+                <div class="form-group flex-between align-center"><input type="text"
+                        class="input-money text-danger w-100" id="exp-amount" placeholder="Rp 0" required
+                        oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group"><label>Keterangan</label><input type="text" id="exp-note"
+                        placeholder="Cth: Makan Siang" required oninput="App.ML.predictCategory(this.value)"></div>
+                <div class="form-row">
+                    <div class="form-group w-50"><label>Kategori <span id="ai-badge" class="badge-ai"
+                                style="display:none;">AI</span></label><select id="exp-category" required></select>
+                    </div>
+                    <div class="form-group w-50"><label>Ambil Dari</label><select id="exp-wallet" required>
+                            <option value="tunai">Tunai</option>
+                            <option value="bank">Bank/E-Wallet</option>
+                        </select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group w-50"><label>Tanggal</label><input type="date" id="exp-date" required></div>
+                    <div class="form-group w-50"><label>Jam</label><input type="time" id="exp-time" required></div>
+                </div>
                 <button type="submit" class="btn-primary mt-2">Simpan Pengeluaran</button>
             </form>
         </div>
@@ -434,85 +600,150 @@
 
     <!-- For Income, Transfer, Goals, etc (Standardized) -->
     <div class="bottom-sheet" id="sheet-add-income">
-        <div class="sheet-header"><h3>Catat Pemasukan</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i class="ph-bold ph-x"></i></button></div>
+        <div class="sheet-header">
+            <h3>Catat Pemasukan</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i
+                    class="ph-bold ph-x"></i></button>
+        </div>
         <div class="sheet-body">
 
             <form onsubmit="App.Transactions.add(event, 'income')">
-                <div class="form-group"><input type="text" class="input-money text-success" id="inc-amount" placeholder="Rp 0" required oninput="App.UI.formatMoneyInput(this)"></div>
-                <div class="form-group"><label>Sumber Pemasukan (Keterangan)</label><input type="text" id="inc-note" required></div>
-                <div class="form-group"><label>Masuk Ke Dompet</label><select id="inc-wallet" required><option value="bank">Bank/E-Wallet</option><option value="tunai">Tunai</option></select></div>
-                <div class="form-row"><div class="form-group w-50"><label>Tanggal</label><input type="date" id="inc-date" required></div><div class="form-group w-50"><label>Jam</label><input type="time" id="inc-time" required></div></div>
-                <button type="submit" class="btn-primary mt-2" style="background: var(--success);">Simpan Pemasukan</button>
+                <div class="form-group"><input type="text" class="input-money text-success" id="inc-amount"
+                        placeholder="Rp 0" required oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group"><label>Sumber Pemasukan (Keterangan)</label><input type="text" id="inc-note"
+                        required></div>
+                <div class="form-group"><label>Masuk Ke Dompet</label><select id="inc-wallet" required>
+                        <option value="bank">Bank/E-Wallet</option>
+                        <option value="tunai">Tunai</option>
+                    </select></div>
+                <div class="form-row">
+                    <div class="form-group w-50"><label>Tanggal</label><input type="date" id="inc-date" required></div>
+                    <div class="form-group w-50"><label>Jam</label><input type="time" id="inc-time" required></div>
+                </div>
+                <button type="submit" class="btn-primary mt-2" style="background: var(--success);">Simpan
+                    Pemasukan</button>
             </form>
         </div>
     </div>
 
     <div class="bottom-sheet" id="sheet-transfer">
-        <div class="sheet-header"><h3>Mutasi Dana</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i class="ph-bold ph-x"></i></button></div>
+        <div class="sheet-header">
+            <h3>Mutasi Dana</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i
+                    class="ph-bold ph-x"></i></button>
+        </div>
         <div class="sheet-body">
 
             <form onsubmit="App.Transactions.transfer(event)">
-                <div class="form-group"><input type="text" class="input-money text-primary" id="trf-amount" placeholder="Rp 0" required oninput="App.UI.formatMoneyInput(this)"></div>
-                <div class="form-row align-center"><div class="form-group w-40"><label>Dari</label><select id="trf-from" required><option value="bank">Bank/E-Wallet</option><option value="tunai">Tunai</option></select></div><div class="w-20 text-center"><i class="ph-bold ph-arrow-right text-primary text-xl"></i></div><div class="form-group w-40"><label>Ke</label><select id="trf-to" required><option value="tunai">Tunai</option><option value="bank">Bank/E-Wallet</option></select></div></div>
+                <div class="form-group"><input type="text" class="input-money text-primary" id="trf-amount"
+                        placeholder="Rp 0" required oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-row align-center">
+                    <div class="form-group w-40"><label>Dari</label><select id="trf-from" required>
+                            <option value="bank">Bank/E-Wallet</option>
+                            <option value="tunai">Tunai</option>
+                        </select></div>
+                    <div class="w-20 text-center"><i class="ph-bold ph-arrow-right text-primary text-xl"></i></div>
+                    <div class="form-group w-40"><label>Ke</label><select id="trf-to" required>
+                            <option value="tunai">Tunai</option>
+                            <option value="bank">Bank/E-Wallet</option>
+                        </select></div>
+                </div>
                 <button type="submit" class="btn-primary mt-4">Proses Mutasi</button>
             </form>
         </div>
     </div>
 
     <div class="bottom-sheet" id="sheet-add-goal">
-        <div class="sheet-header"><h3>Buat Target Tabungan</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i class="ph-bold ph-x"></i></button></div>
+        <div class="sheet-header">
+            <h3>Buat Target Tabungan</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i
+                    class="ph-bold ph-x"></i></button>
+        </div>
         <div class="sheet-body">
             <form onsubmit="App.Goals.add(event)">
-                <div class="form-group"><label>Nama Target (Cth: Beli Motor)</label><input type="text" id="goal-name" required></div>
-                <div class="form-group"><label>Nominal Target (Rp)</label><input type="text" id="goal-target" required oninput="App.UI.formatMoneyInput(this)"></div>
-                <div class="form-group"><label>Saldo Awal Saat Ini</label><input type="text" id="goal-current" placeholder="Rp 0" oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group"><label>Nama Target (Cth: Beli Motor)</label><input type="text" id="goal-name"
+                        required></div>
+                <div class="form-group"><label>Nominal Target (Rp)</label><input type="text" id="goal-target" required
+                        oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group"><label>Saldo Awal Saat Ini</label><input type="text" id="goal-current"
+                        placeholder="Rp 0" oninput="App.UI.formatMoneyInput(this)"></div>
                 <button type="submit" class="btn-primary mt-2">Buat Target</button>
             </form>
         </div>
     </div>
 
     <div class="bottom-sheet" id="sheet-add-goal-fund">
-        <div class="sheet-header"><h3>Isi Saldo Tabungan</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i class="ph-bold ph-x"></i></button></div>
+        <div class="sheet-header">
+            <h3>Isi Saldo Tabungan</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i
+                    class="ph-bold ph-x"></i></button>
+        </div>
         <div class="sheet-body">
             <form onsubmit="App.Goals.addFunds(event)">
                 <input type="hidden" id="goal-fund-id">
-                <div class="form-group"><label>Sumber Dana</label><select id="goal-fund-wallet" required><option value="bank">Bank/E-Wallet</option><option value="tunai">Tunai</option></select></div>
-                <div class="form-group"><label>Nominal Ditabung</label><input type="text" class="input-money text-success" id="goal-fund-amount" required oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group"><label>Sumber Dana</label><select id="goal-fund-wallet" required>
+                        <option value="bank">Bank/E-Wallet</option>
+                        <option value="tunai">Tunai</option>
+                    </select></div>
+                <div class="form-group"><label>Nominal Ditabung</label><input type="text"
+                        class="input-money text-success" id="goal-fund-amount" required
+                        oninput="App.UI.formatMoneyInput(this)"></div>
                 <button type="submit" class="btn-primary mt-2">Konfirmasi Simpanan</button>
             </form>
         </div>
     </div>
 
     <div class="bottom-sheet" id="sheet-add-sub">
-        <div class="sheet-header"><h3>Tagihan Rutin</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i class="ph-bold ph-x"></i></button></div>
+        <div class="sheet-header">
+            <h3>Tagihan Rutin</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i
+                    class="ph-bold ph-x"></i></button>
+        </div>
         <div class="sheet-body">
             <form onsubmit="App.Subs.add(event)">
-                <div class="form-group"><label>Nama Tagihan (Cth: Uang Kos)</label><input type="text" id="sub-name" required></div>
-                <div class="form-group"><label>Nominal (Rp)</label><input type="text" id="sub-amount" required oninput="App.UI.formatMoneyInput(this)"></div>
-                <div class="form-row"><div class="form-group w-50"><label>Tgl Bayar (1-31)</label><input type="number" id="sub-date" min="1" max="31" required></div><div class="form-group w-50"><label>Otomatis Potong</label><select id="sub-wallet" required><option value="bank">Bank</option><option value="tunai">Tunai</option></select></div></div>
+                <div class="form-group"><label>Nama Tagihan (Cth: Uang Kos)</label><input type="text" id="sub-name"
+                        required></div>
+                <div class="form-group"><label>Nominal (Rp)</label><input type="text" id="sub-amount" required
+                        oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-row">
+                    <div class="form-group w-50"><label>Tgl Bayar (1-31)</label><input type="number" id="sub-date"
+                            min="1" max="31" required></div>
+                    <div class="form-group w-50"><label>Otomatis Potong</label><select id="sub-wallet" required>
+                            <option value="bank">Bank</option>
+                            <option value="tunai">Tunai</option>
+                        </select></div>
+                </div>
                 <button type="submit" class="btn-primary mt-2">Simpan Jadwal</button>
             </form>
         </div>
     </div>
 
     <div class="bottom-sheet" id="sheet-budget">
-        <div class="sheet-header"><h3>Atur Batas Anggaran</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i class="ph-bold ph-x"></i></button></div>
+        <div class="sheet-header">
+            <h3>Atur Batas Anggaran</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i
+                    class="ph-bold ph-x"></i></button>
+        </div>
         <div class="sheet-body">
             <form onsubmit="App.Budget.save(event)">
-                <div class="form-group"><input type="text" class="input-money text-primary" id="budget-amount" placeholder="Rp 0" required oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group"><input type="text" class="input-money text-primary" id="budget-amount"
+                        placeholder="Rp 0" required oninput="App.UI.formatMoneyInput(this)"></div>
                 <button type="submit" class="btn-primary mt-2">Terapkan Batasan</button>
-                <button type="button" class="btn-secondary mt-2 w-100" onclick="App.Budget.reset()">Hapus Anggaran</button>
+                <button type="button" class="btn-secondary mt-2 w-100" onclick="App.Budget.reset()">Hapus
+                    Anggaran</button>
             </form>
         </div>
     </div>
 
     <div class="bottom-sheet" id="sheet-export-pdf">
-        <div class="sheet-header"><h3>Cetak Laporan PDF</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i class="ph-bold ph-x"></i></button></div>
+        <div class="sheet-header">
+            <h3>Cetak Laporan PDF</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i
+                    class="ph-bold ph-x"></i></button>
+        </div>
         <div class="sheet-body">
             <form onsubmit="App.Export.exportPDF(event)">
-                <div class="form-row"><div class="form-group w-50"><label>Bulan Laporan</label><select id="pdf-month" required></select></div><div class="form-group w-50"><label>Tahun</label><select id="pdf-year" required></select></div></div>
+                <div class="form-row">
+                    <div class="form-group w-50"><label>Bulan Laporan</label><select id="pdf-month" required></select>
+                    </div>
+                    <div class="form-group w-50"><label>Tahun</label><select id="pdf-year" required></select></div>
+                </div>
                 <div class="form-group"><label>Judul Laporan</label><input type="text" id="pdf-title" required></div>
-                <div class="form-group"><label>Saldo Awal Bulan (Rp)</label><input type="text" id="pdf-saldo" required oninput="App.UI.formatMoneyInput(this)"></div>
+                <div class="form-group"><label>Saldo Awal Bulan (Rp)</label><input type="text" id="pdf-saldo" required
+                        oninput="App.UI.formatMoneyInput(this)"></div>
                 <button type="submit" class="btn-primary mt-2">Unduh PDF</button>
             </form>
         </div>
@@ -520,9 +751,14 @@
 
     <!-- Custom Category Sheet -->
     <div class="bottom-sheet" id="sheet-custom-category" style="z-index: 10005;">
-        <div class="sheet-header"><h3>Buat Kategori Baru</h3><button class="btn-close" onclick="document.getElementById('sheet-custom-category').classList.remove('active')"><i class="ph-bold ph-x"></i></button></div>
+        <div class="sheet-header">
+            <h3>Buat Kategori Baru</h3><button class="btn-close"
+                onclick="document.getElementById('sheet-custom-category').classList.remove('active')"><i
+                    class="ph-bold ph-x"></i></button>
+        </div>
         <div class="sheet-body">
-            <div class="form-group"><label>Nama Kategori</label><input type="text" id="new-cat-name" placeholder="Cth: Belanja Bulanan"></div>
+            <div class="form-group"><label>Nama Kategori</label><input type="text" id="new-cat-name"
+                    placeholder="Cth: Belanja Bulanan"></div>
             <button class="btn-primary mt-2" onclick="App.UI.saveCustomCategory()">Simpan Kategori</button>
         </div>
     </div>
@@ -534,7 +770,8 @@
             <button class="btn-icon" onclick="App.UI.closeFullscreenChart()"><i class="ph-bold ph-x"></i></button>
         </div>
         <div class="modal-body" style="height: calc(100dvh - 80px);">
-            <p class="rotate-hint"><i class="ph-bold ph-device-rotate"></i> Putar layar (Landscape) untuk analisis lebih baik</p>
+            <p class="rotate-hint"><i class="ph-bold ph-device-rotate"></i> Putar layar (Landscape) untuk analisis lebih
+                baik</p>
             <div class="chart-wrapper-fs" style="position: relative; height: 80%; width: 100%;">
                 <canvas id="fs-chart-canvas"></canvas>
             </div>
@@ -543,7 +780,10 @@
 
     <!-- Profile Photo Options Sheet -->
     <div class="bottom-sheet" id="sheet-profile-photo">
-        <div class="sheet-header"><h3>Opsi Foto Profil</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i class="ph-bold ph-x"></i></button></div>
+        <div class="sheet-header">
+            <h3>Opsi Foto Profil</h3><button class="btn-close" onclick="App.UI.closeAllSheets()"><i
+                    class="ph-bold ph-x"></i></button>
+        </div>
         <div class="sheet-body">
             <div class="settings-menu">
                 <button class="setting-item" onclick="App.UI.viewProfilePhotoFullscreen()">
@@ -553,7 +793,8 @@
                 <label class="setting-item">
                     <div class="setting-icon text-success"><i class="ph-fill ph-camera"></i></div>
                     <div class="setting-text">Ubah Foto</div>
-                    <input type="file" accept="image/*" style="display:none;" onchange="App.UI.handleProfileUpload(event)">
+                    <input type="file" accept="image/*" style="display:none;"
+                        onchange="App.UI.handleProfileUpload(event)">
                 </label>
                 <button class="setting-item text-danger" onclick="App.UI.deleteProfilePhoto()">
                     <div class="setting-icon text-danger"><i class="ph-fill ph-trash"></i></div>
@@ -570,14 +811,16 @@
             <button class="btn-icon" onclick="App.UI.closeFullscreenPhoto()"><i class="ph-bold ph-x"></i></button>
         </div>
         <div class="modal-body flex-center" style="height: calc(100dvh - 80px); background: rgba(0,0,0,0.8);">
-            <img src="" id="fs-photo-img" style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px;">
+            <img src="" id="fs-photo-img"
+                style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 12px;">
         </div>
     </div>
 
     <div id="toast" class="toast">Sistem Terbarui</div>
-    
+
 
 
     <script src="script.js"></script>
 </body>
+
 </html>

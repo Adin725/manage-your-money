@@ -21,10 +21,24 @@ const App = (() => {
         async get(key) { return await db.getItem(key); },
         async set(key, val) { await db.setItem(key, val); },
         async clearData() {
-            if (confirm('Anda yakin ingin mereset seluruh data?')) {
-                await db.clear(); await this.init();
-                App.UI.toast('Data direset'); window.location.reload();
-            }
+            Swal.fire({
+                title: 'Reset Semua Data?',
+                text: "Aksi ini akan menghapus permanen seluruh data transaksi, dompet, dan pengaturan. Anda akan diminta mendaftar ulang. Apakah Anda yakin?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#64748B',
+                confirmButtonText: 'Ya, Hapus Permanen',
+                cancelButtonText: 'Batal',
+                background: document.body.classList.contains('dark-theme') ? '#1E293B' : '#FFFFFF',
+                color: document.body.classList.contains('dark-theme') ? '#F8FAFC' : '#1E293B'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    await db.clear(); await this.init();
+                    localStorage.removeItem('story_last_shown');
+                    Swal.fire({ title: 'Berhasil!', text: 'Semua data telah direset.', icon: 'success', timer: 1500, showConfirmButton: false }).then(() => window.location.reload());
+                }
+            });
         },
         async exportBackup() {
             const data = { wallets: await this.get('wallets'), history: await this.get('history'), budget: await this.get('budget'), goals: await this.get('goals'), subs: await this.get('subs') };
@@ -45,46 +59,6 @@ const App = (() => {
                 } catch(err) { App.UI.toast('File backup tidak valid!'); }
             };
             reader.readAsText(file);
-        },
-        async generateDummyData() {
-            const now = new Date();
-            const currYear = now.getFullYear();
-            const currMonth = now.getMonth();
-            const prevMonth = currMonth === 0 ? 11 : currMonth - 1;
-            const prevYear = currMonth === 0 ? currYear - 1 : currYear;
-
-            let history = [];
-            
-            // Generate Prev Month Data
-            for(let i = 1; i <= 28; i+=2) {
-                const dateStr = new Date(prevYear, prevMonth, i, 12, 0).toISOString();
-                history.push({ id: Date.now()+Math.random(), type: 'expense', amount: 50000 + Math.random()*50000, note: 'Makan Siang', wallet: 'bank', category: 'Makanan & Minuman', date: dateStr });
-                history.push({ id: Date.now()+Math.random(), type: 'expense', amount: 10000, note: 'Parkir / Admin', wallet: 'tunai', category: 'Lainnya', date: dateStr });
-            }
-            history.push({ id: Date.now()+Math.random(), type: 'expense', amount: 300000, note: 'Bensin Bulanan', wallet: 'bank', category: 'Transportasi', date: new Date(prevYear, prevMonth, 5).toISOString() });
-            
-            // Generate Current Month Data up to day 21
-            history.push({ id: Date.now()+Math.random(), type: 'income', amount: 6000000, note: 'Gaji Bulanan', wallet: 'bank', category: 'Pemasukan', date: new Date(currYear, currMonth, 1).toISOString() });
-            
-            for(let i = 1; i <= 21; i++) {
-                const dateStr = new Date(currYear, currMonth, i, 13, 0).toISOString();
-                history.push({ id: Date.now()+Math.random(), type: 'expense', amount: 60000 + Math.random()*40000, note: 'Makan', wallet: 'bank', category: 'Makanan & Minuman', date: dateStr });
-                if(i % 3 === 0) history.push({ id: Date.now()+Math.random(), type: 'expense', amount: 15000, note: 'Parkir / Admin', wallet: 'tunai', category: 'Lainnya', date: dateStr });
-            }
-            
-            // Inject Anomaly (Current Month)
-            history.push({ id: Date.now()+Math.random(), type: 'expense', amount: 350000, note: 'Starbucks Bareng Teman', wallet: 'bank', category: 'Makanan & Minuman', date: new Date(currYear, currMonth, 15).toISOString() });
-            history.push({ id: Date.now()+Math.random(), type: 'expense', amount: 1200000, note: 'Beli Sepatu', wallet: 'bank', category: 'Belanja', date: new Date(currYear, currMonth, 18).toISOString() });
-
-            // Sort history desc
-            history.sort((a,b) => new Date(b.date) - new Date(a.date));
-
-            await this.set('history', history);
-            await this.set('wallets', { bank: 3500000, tunai: 500000 });
-            await this.set('budget', 4000000);
-            
-            App.UI.toast('Data Dummy Berhasil Diinjeksi!');
-            window.location.reload();
         }
     };
 
@@ -127,7 +101,7 @@ const App = (() => {
             const profile = { 
                 name: document.getElementById('reg-name').value, 
                 email: document.getElementById('reg-email').value, 
-                dob: document.getElementById('reg-dob').value 
+                password: document.getElementById('reg-password').value 
             };
             await Data.set('user_profile', profile);
             this.updateAppHeader(profile);
@@ -166,6 +140,19 @@ const App = (() => {
         step: 0,
         texts: [],
         async start() {
+            const today = new Date().toISOString().split('T')[0];
+            const lastShown = localStorage.getItem('story_last_shown');
+            
+            if (lastShown === today) {
+                document.getElementById('screen-register-profile').classList.remove('active');
+                document.getElementById('screen-register-pin').classList.remove('active');
+                document.getElementById('screen-login').classList.remove('active');     
+                Auth.navTo('screen-app');
+                return;
+            }
+            
+            localStorage.setItem('story_last_shown', today);
+
             const profile = await Data.get('user_profile');
             const name = profile ? profile.name : 'Kamu';
             const pinStr = profile ? profile.pin : '';
@@ -250,6 +237,29 @@ const App = (() => {
             el.textContent = msg; el.classList.add('show');
             setTimeout(() => el.classList.remove('show'), 3000);
         },
+        playTing() {
+            try {
+                // Using a valid CDN URL for a professional UI success chime
+                const a = new Audio("https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3");
+                a.volume = 0.6; 
+                a.play().catch(e=>console.log('Audio autoplay prevented or failed:', e));
+            } catch(err){}
+        },
+
+        showSuccessSwal(title) {
+            this.playTing();
+            Swal.fire({
+                title: title,
+                icon: 'success',
+                showConfirmButton: false,
+                timer: 1500,
+                backdrop: `rgba(0,0,0,0.4)`,
+                customClass: { popup: 'rounded-xl' }
+            });
+        },
+        showSendingMoneyAnimation() {
+            // Disabled in favor of SweetAlert2
+        },
         switchView(id) {
             document.querySelectorAll('.view, .nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -287,10 +297,21 @@ const App = (() => {
             const orig = charts[id];
             if (!orig) return;
             
+            const newData = {
+                labels: orig.data.labels ? [...orig.data.labels] : [],
+                datasets: orig.data.datasets.map(ds => {
+                    let newDs = Object.assign({}, ds);
+                    if(Array.isArray(ds.data)) newDs.data = [...ds.data];
+                    if(Array.isArray(ds.backgroundColor)) newDs.backgroundColor = [...ds.backgroundColor];
+                    delete newDs._meta; // Safely remove Chart.js internal bindings
+                    return newDs;
+                })
+            };
+            
             charts['fs'] = new Chart(document.getElementById('fs-chart-canvas'), {
                 type: orig.config.type,
-                data: orig.config.data,
-                options: { ...orig.config.options, maintainAspectRatio: false }
+                data: newData,
+                options: Object.assign({}, orig.config.options, { maintainAspectRatio: false, responsive: true })
             });
         },
         closeFullscreenChart() {
@@ -377,7 +398,9 @@ const App = (() => {
             const h = await Data.get('history');
             h.unshift({ id: Date.now(), type, amount:amt, note, wallet, category:cat, date });
             await Data.set('wallets', w); await Data.set('history', h);
-            UI.closeAllSheets(); UI.toast('Berhasil dicatat!'); App.Core.refresh();
+            UI.closeAllSheets(); 
+            UI.showSuccessSwal('Berhasil dicatat!'); 
+            App.Core.refresh();
         },
         async transfer(e) {
             e.preventDefault();
@@ -392,7 +415,9 @@ const App = (() => {
             const h = await Data.get('history');
             h.unshift({ id: Date.now(), type: 'transfer', amount:amt, note: `Mutasi ${from} ke ${to}`, wallet: from, category: 'Transfer', date: new Date().toISOString() });
             await Data.set('wallets', w); await Data.set('history', h);
-            UI.closeAllSheets(); UI.toast('Mutasi berhasil'); App.Core.refresh();
+            UI.closeAllSheets(); 
+            UI.showSuccessSwal('Mutasi berhasil!'); 
+            App.Core.refresh();
         }
     };
 
@@ -471,20 +496,42 @@ const App = (() => {
             const b = await Data.get('budget'); const h = await Data.get('history');
             let exp = 0; h.forEach(t => { if(t.type === 'expense' && new Date(t.date).getMonth() === new Date().getMonth()) exp += t.amount; });
             const info = document.getElementById('budget-info'); const left = document.getElementById('budget-left'); const prog = document.getElementById('budget-progress');
-            if (!b) { info.textContent = 'Klik untuk mengatur batas'; left.textContent = 'Belum Diatur'; prog.style.width = '0%'; return; }
+            const pctText = document.getElementById('budget-pct');
+            if (!b) { info.textContent = 'Klik untuk mengatur batas'; left.textContent = 'Belum Diatur'; prog.style.width = '0%'; if(pctText) pctText.style.display='none'; return; }
             const sisa = b - exp; const pct = Math.min(100, (exp / b) * 100);
-            info.textContent = `Dari limit ${formatRp(b).replace(',00','')}`; left.textContent = sisa >= 0 ? formatRp(sisa).replace(',00','') : `Min ${formatRp(Math.abs(sisa)).replace(',00','')}`; left.className = sisa < 0 ? 'text-danger' : 'text-primary';
+            info.textContent = `Dari limit ${formatRp(b).replace(',00','')}`; 
+            left.textContent = sisa >= 0 ? formatRp(sisa).replace(',00','') : `Min ${formatRp(Math.abs(sisa)).replace(',00','')}`; 
+            left.className = sisa < 0 ? 'text-danger' : 'text-primary';
+            if(pctText) {
+                pctText.style.display = 'inline-block';
+                pctText.textContent = `${Math.round((exp / b) * 100)}% Terpakai`;
+                pctText.style.color = (pct >= 90) ? 'var(--danger)' : ((pct >= 70) ? 'var(--warning)' : 'var(--success)');
+                pctText.style.background = (pct >= 90) ? 'rgba(239, 68, 68, 0.1)' : ((pct >= 70) ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)');
+            }
             prog.style.width = `${pct}%`; prog.className = 'progress-bar-fill ' + (pct >= 90 ? 'bg-danger' : (pct >= 70 ? 'bg-warning' : 'bg-primary'));
         }
     };
 
     const History = {
-        initFilter() {
+        async initFilter() {
+            const h = await Data.get('history');
             const ySel = document.getElementById('history-year'); const mSel = document.getElementById('history-month');
             if(ySel.options.length) return;
-            const curr = new Date(); for(let i=0; i<5; i++) ySel.add(new Option(curr.getFullYear()-i, curr.getFullYear()-i));
-            ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'].forEach((m, i) => mSel.add(new Option(m, i)));
-            mSel.value = curr.getMonth(); this.render();
+            
+            let uniqueYears = [...new Set(h.map(t => new Date(t.date).getFullYear()))].sort((a,b)=>b-a);
+            let uniqueMonths = [...new Set(h.map(t => new Date(t.date).getMonth()))].sort((a,b)=>a-b);
+            
+            if (uniqueYears.length === 0) uniqueYears = [new Date().getFullYear()];
+            if (uniqueMonths.length === 0) uniqueMonths = [new Date().getMonth()];
+            
+            uniqueYears.forEach(y => ySel.add(new Option(y, y)));
+            const monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+            uniqueMonths.forEach(m => mSel.add(new Option(monthNames[m], m)));
+            
+            const curr = new Date();
+            if(uniqueYears.includes(curr.getFullYear())) ySel.value = curr.getFullYear();
+            if(uniqueMonths.includes(curr.getMonth())) mSel.value = curr.getMonth();
+            this.render();
         },
         async render() {
             const h = await Data.get('history'); const y = parseInt(document.getElementById('history-year').value); const m = parseInt(document.getElementById('history-month').value);
@@ -584,10 +631,22 @@ const App = (() => {
                 data = labels.map(l => grouped[l]);
             }
 
+            let periodText = '';
+            if(period === 'hari') periodText = 'Jam';
+            else if(period === 'minggu') periodText = 'Harian';
+            else if(period === 'bulan') periodText = 'Mingguan';
+            else if(period === 'tahun') periodText = 'Bulanan';
+            
             const total = data.reduce((a,b)=>a+b,0);
             const validData = data.filter(v=>v>0);
             document.getElementById('stat-dyn-total').textContent = formatRp(total).replace(',00','');
             document.getElementById('stat-dyn-avg').textContent = formatRp(total/labels.length).replace(',00','');
+            
+            const maxLabel = document.getElementById('label-dyn-max');
+            const minLabel = document.getElementById('label-dyn-min');
+            if (maxLabel) maxLabel.textContent = `Tertinggi ${periodText}`;
+            if (minLabel) minLabel.textContent = `Terendah ${periodText}`;
+            
             document.getElementById('stat-dyn-max').textContent = formatRp(Math.max(...data, 0)).replace(',00','');
             document.getElementById('stat-dyn-min').textContent = validData.length ? formatRp(Math.min(...validData)).replace(',00','') : 'Rp 0';
 
@@ -616,16 +675,69 @@ const App = (() => {
         async renderKategori() {
             const exp = (await Data.get('history')).filter(t => t.type === 'expense' && new Date(t.date).getMonth() === new Date().getMonth());
             const cat = {}; exp.forEach(t => { cat[t.category] = (cat[t.category] || 0) + t.amount; });
+            const totalExp = exp.reduce((a, b) => a + b.amount, 0);
             const colors = ['#4F46E5', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
             this.createChart('chart-kategori', 'doughnut', {
                 labels: Object.keys(cat),
                 datasets: [{ data: Object.values(cat), backgroundColor: colors, borderWidth: 0, hoverOffset: 8, datalabels: { display: false } }]
-            }, { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'right', labels: {usePointStyle: true} } } });
-
-            const list = document.getElementById('list-kategori-breakdown'); list.innerHTML = '';
-            Object.entries(cat).sort((a,b)=>b[1]-a[1]).forEach(([k,v], i) => {
-                list.innerHTML += `<li class="activity-item"><div class="activity-left"><div class="activity-icon" style="background:${colors[i%colors.length]}20; color:${colors[i%colors.length]}"><i class="ph-bold ph-tag"></i></div><div><h4 class="activity-title">${k}</h4></div></div><div class="activity-amount text-main">${formatRp(v).replace(',00','')}</div></li>`;
+            }, { 
+                responsive: true, maintainAspectRatio: false, cutout: '75%', 
+                onClick: (e, elements) => {
+                    if (elements && elements.length > 0) {
+                        const idx = elements[0].index;
+                        const categoryName = Object.keys(cat)[idx];
+                        const items = exp.filter(t => t.category === categoryName);
+                        const pct = ((cat[categoryName] / totalExp) * 100).toFixed(1);
+                        let html = `<div style="text-align:left; max-height: 50vh; overflow-y: auto; padding: 10px;">
+                                      <p class="text-sm text-muted mb-3">Total ${items.length} transaksi (${pct}% dari pengeluaran).</p>`;
+                        items.forEach(t => {
+                            const d = new Date(t.date).toLocaleDateString('id-ID', {day:'numeric', month:'short'});
+                            html += `<div style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:12px; align-items:center;">
+                                        <div><strong style="color:var(--text-main); font-size:1rem;">${t.note}</strong><br><span style="font-size:0.8rem; color:var(--text-muted);">${d}</span></div>
+                                        <div style="font-weight:700; color:var(--text-main); font-size:1.05rem;">${formatRp(t.amount).replace(',00','')}</div>
+                                     </div>`;
+                        });
+                        html += `</div>`;
+                        Swal.fire({
+                            title: categoryName,
+                            html: html,
+                            background: document.body.classList.contains('dark-theme') ? '#1E293B' : '#FFFFFF',
+                            color: document.body.classList.contains('dark-theme') ? '#F8FAFC' : '#1E293B',
+                            showCloseButton: true,
+                            showConfirmButton: false
+                        });
+                    }
+                },
+                plugins: { 
+                    legend: { position: 'right', labels: {usePointStyle: true, color: document.body.classList.contains('dark-theme') ? '#F8FAFC' : '#64748B'} },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let value = context.raw || 0;
+                                let percentage = totalExp > 0 ? ((value / totalExp) * 100).toFixed(1) + '%' : '0%';
+                                return ` ${context.label}: ${formatRp(value).replace(',00', '')} (${percentage})`;
+                            }
+                        }
+                    }
+                } 
             });
+
+            const breakdownHtml = `
+            <details class="modern-details mt-4">
+                <summary class="text-adaptive-primary" style="font-weight: 600;">Lihat Detail Kategori</summary>
+                <div class="mt-2">
+                    ${Object.keys(cat).sort((a,b) => cat[b] - cat[a]).map(k => `
+                        <div class="activity-item mb-2" style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; background: var(--surface);">
+                            <div class="activity-left">
+                                <div class="activity-icon category-icon" style="border-radius: 12px;"><i class="ph-bold ph-tag"></i></div>
+                                <div><h4 class="activity-title text-adaptive-primary" style="margin-bottom:2px; font-size: 1.05rem; font-weight: 700;">${k}</h4><span class="activity-date">${((cat[k]/totalExp)*100).toFixed(1)}% dari total</span></div>
+                            </div>
+                            <div class="activity-amount" style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">${formatRp(cat[k]).replace(',00', '')}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </details>`;
+            document.getElementById('list-kategori-breakdown').innerHTML = breakdownHtml;
         },
         async populateAnomaliFilter() {
             const h = await Data.get('history');
@@ -647,21 +759,25 @@ const App = (() => {
                 if(charts['chart-anomali']) charts['chart-anomali'].destroy(); return;
             }
 
-            // Real Anomaly Logic: Compare against historical average + standard deviation
-            const histExp = exp.filter(t => new Date(t.date).getMonth() !== currMonth || new Date(t.date).getFullYear() !== currYear);
-            
-            let upperLimit = 150000; // Default if no history
-            if(histExp.length >= 3) {
-                const amounts = histExp.map(t => t.amount).sort((a,b)=>a-b);
-                const q1 = amounts[Math.floor(amounts.length * 0.25)];
-                const q3 = amounts[Math.floor(amounts.length * 0.75)];
+            // Real Anomaly Logic: Compare against historical + current month mixed
+            let upperLimit = 50000;
+            if(exp.length >= 5) {
+                const amounts = exp.map(t => t.amount).sort((a,b)=>a-b);
+                // Proper percentile interpolation
+                const getPercentile = (arr, p) => {
+                    const idx = (arr.length - 1) * p; const lower = Math.floor(idx); const frac = idx - lower;
+                    if(lower >= arr.length - 1) return arr[lower];
+                    return arr[lower] + frac * (arr[lower+1] - arr[lower]);
+                };
+                const q1 = getPercentile(amounts, 0.25);
+                const q3 = getPercentile(amounts, 0.75);
                 const iqr = q3 - q1;
-                upperLimit = q3 + (1.5 * iqr);
-            } else {
-                // If no past history, use current month's IQR
-                const amounts = currExp.map(t => t.amount).sort((a,b)=>a-b);
-                const q3 = amounts[Math.floor(amounts.length * 0.75)];
-                upperLimit = Math.max(q3 * 1.5, 50000); // Minimum threshold
+                upperLimit = Math.max(q3 + (1.5 * iqr), 50000);
+            } else if(currExp.length >= 3) {
+                // Fallback to mean + 1.5 * stddev
+                const mean = currExp.reduce((a,b)=>a+b.amount,0) / currExp.length;
+                const variance = currExp.reduce((a,b)=>a+Math.pow(b.amount-mean,2),0) / currExp.length;
+                upperLimit = Math.max(mean + (1.5 * Math.sqrt(variance)), mean * 2.5, 50000);
             }
 
             const norm=[], anom=[];
@@ -670,14 +786,14 @@ const App = (() => {
                 const pt = { x: new Date(t.date).getDate(), y: t.amount, note: t.note };
                 if (t.amount > upperLimit) {
                     anom.push(pt);
-                    anomHtml += `<div class="activity-item mb-2" style="border-left: 4px solid var(--danger);"><div class="activity-left"><div><h4 class="activity-title text-danger">${t.category} Melonjak!</h4><span class="activity-date">${t.note}</span></div></div><div class="activity-amount text-danger">${formatRp(t.amount).replace(',00','')}</div></div>`;
+                    anomHtml += `<div class="insight-card-modern" style="border: 1px solid var(--primary); padding: 16px; border-radius: var(--radius-md); box-shadow: none; background: var(--surface); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;"><div class="insight-text-modern"><strong class="text-adaptive-primary" style="font-size:1rem; display: block; margin-bottom: 4px;">${t.category} Melonjak!</strong><span class="text-muted text-sm">${t.note}</span></div><div class="text-danger font-weight-bold ml-auto" style="font-size:1.1rem;">${formatRp(t.amount).replace(',00','')}</div></div>`;
                 } else {
                     norm.push(pt);
                 }
             });
 
             if(anom.length > 0) {
-                document.getElementById('anomali-insights').innerHTML = `<p class="text-sm mb-3">Batas Wajar Kategori Ini: <strong>${formatRp(upperLimit).replace(',00','')}</strong>. Terdeteksi <strong>${anom.length}</strong> transaksi aneh.</p>${anomHtml}`;
+                document.getElementById('anomali-insights').innerHTML = `<div class="text-sm mb-4" style="color: var(--text-main);">Batas Wajar Kategori Ini: <strong>${formatRp(upperLimit).replace(',00','')}</strong>. Terdeteksi <strong>${anom.length}</strong> transaksi aneh.</div><details class="modern-details"><summary class="text-adaptive-primary" style="font-weight: 600;">Lihat Detail Transaksi Aneh</summary><div class="mt-2">${anomHtml}</div></details>`;
             } else {
                 document.getElementById('anomali-insights').innerHTML = `<p class="text-sm text-success text-center mt-4"><i class="ph-fill ph-check-circle text-xl mb-2"></i><br>Pengeluaran terpantau aman dan sesuai kebiasaan.</p>`;
             }
@@ -694,8 +810,8 @@ const App = (() => {
             const currDate = now.getDate();
             const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
             
-            if (currDate < 20) {
-                document.getElementById('prediksi-insights').innerHTML = `<div class="flex-center flex-column text-center p-4"><i class="ph-fill ph-calendar text-xl text-primary mb-2"></i><p class="text-sm">Sistem Prediksi akan aktif setelah <strong>Tanggal 20</strong> untuk memberikan estimasi akhir bulan yang akurat.</p></div>`;
+            if (currDate <= 1) {
+                document.getElementById('prediksi-insights').innerHTML = `<div class="flex-center flex-column text-center p-4"><i class="ph-fill ph-calendar text-xl text-primary mb-2"></i><p class="text-sm">Silakan catat pengeluaran hari ini terlebih dahulu untuk memulai perhitungan prediksi.</p></div>`;
                 if(charts['chart-prediksi']) {
                     document.getElementById('chart-prediksi').parentElement.style.display = 'none';
                 }
@@ -710,7 +826,16 @@ const App = (() => {
             let totalSpent = 0;
             exp.forEach(t => totalSpent += t.amount);
             
-            const dailyAvg = totalSpent / currDate;
+            // Weighted moving average for daily rate (last 7 days have more weight)
+            let recentSum = 0; let recentWeight = 0;
+            for(let i=0; i<currDate; i++) {
+                const dayExp = exp.filter(t => new Date(t.date).getDate() === (i+1)).reduce((a,b)=>a+b.amount,0);
+                const weight = i >= currDate - 7 ? 2 : 1;
+                recentSum += dayExp * weight;
+                recentWeight += weight;
+            }
+            
+            const dailyAvg = recentSum / recentWeight;
             const remainingDays = lastDay - currDate;
             const projectedSpent = dailyAvg * remainingDays;
             const finalProjection = totalSpent + projectedSpent;
@@ -721,17 +846,48 @@ const App = (() => {
             if (budget > 0) {
                 if (finalProjection > budget) {
                     isDanger = true;
-                    insightHtml = `<h4 class="text-danger mb-2">Peringatan: Overbudget!</h4><p class="text-sm">Kecepatan jajanmu saat ini <strong>${formatRp(dailyAvg).replace(',00','')} / hari</strong>. Jika diteruskan, di akhir bulan kamu akan tembus <strong>${formatRp(finalProjection).replace(',00','')}</strong> (Batas: ${formatRp(budget).replace(',00','')}).<br><br><strong>Saran:</strong> Batasi jajan maks ${formatRp((budget-totalSpent)/remainingDays).replace(',00','')}/hari mulai besok.</p>`;
+                    insightHtml = `
+                    <div class="insight-card-modern" style="position: relative; overflow: hidden; border: 1px solid var(--border-color); background: var(--surface); align-items: flex-start; padding: 24px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); display: flex; flex-direction: column;">
+                        <div class="circle circle-1 floating-slow" style="position: absolute; top: -80px; right: -50px; width: 180px; height: 180px;"></div>
+                        <div class="circle circle-2 floating-fast" style="position: absolute; bottom: -40px; left: -40px; width: 120px; height: 120px;"></div>
+                        
+                        <div style="z-index: 1; display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 16px;">
+                            <span style="font-size: 1rem; opacity: 0.9; color: var(--text-main);">Peringatan</span>
+                            <i class="ph-fill ph-warning" style="font-size: 1.5rem; color: var(--danger);"></i>
+                        </div>
+                        <h2 class="text-danger" style="z-index: 1; font-size: 1.8rem; font-weight: 800; margin-bottom: 16px; text-transform: uppercase;">OVERBUDGET!</h2>
+                        <p style="z-index: 1; font-size: 0.95rem; color: var(--text-main); line-height: 1.6; margin-bottom: 24px;">Kecepatan jajanmu <strong class="text-danger">${formatRp(dailyAvg).replace(',00','')} / hari</strong>. Di akhir bulan kamu akan tembus <strong class="text-danger">${formatRp(finalProjection).replace(',00','')}</strong>.</p>
+                        <div style="z-index: 1; background: #0F172A; padding: 12px 16px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; width: 100%; color: #FFFFFF;"><span class="text-danger">Saran:</span> Batasi maks ${formatRp((budget-totalSpent)/remainingDays).replace('Rp','').replace(',00','')}/hari mulai besok.</div>
+                    </div>`;
                 } else {
-                    insightHtml = `<h4 class="text-success mb-2">Jalur Aman</h4><p class="text-sm">Kecepatan jajanmu sangat terkendali. Di akhir bulan diperkirakan kamu masih punya sisa budget sekitar <strong>${formatRp(budget - finalProjection).replace(',00','')}</strong>.</p>`;
+                    insightHtml = `
+                    <div class="insight-card-modern" style="position: relative; overflow: hidden; border: 1px solid var(--border-color); background: var(--surface); align-items: flex-start; padding: 24px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); display: flex; flex-direction: column;">
+                        <div class="circle circle-1 floating-slow" style="position: absolute; top: -80px; right: -50px; width: 180px; height: 180px;"></div>
+                        <div class="circle circle-2 floating-fast" style="position: absolute; bottom: -40px; left: -40px; width: 120px; height: 120px;"></div>
+                        
+                        <div style="z-index: 1; display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 16px;">
+                            <span style="font-size: 1rem; opacity: 0.9; color: var(--text-main);">Sistem Analisis</span>
+                            <i class="ph-fill ph-robot" style="font-size: 1.5rem; color: var(--success);"></i>
+                        </div>
+                        <h2 class="text-success" style="z-index: 1; font-size: 1.8rem; font-weight: 800; margin-bottom: 12px; text-transform: uppercase;">JALUR AMAN</h2>
+                        <p style="z-index: 1; font-size: 0.95rem; color: var(--text-main); line-height: 1.6;">Kecepatan jajan terkendali. Sisa prediksi <strong class="text-success">Rp ${formatRp(budget - finalProjection).replace('Rp','').replace(',00','')}</strong></p>
+                    </div>`;
                 }
             } else {
-                insightHtml = `<p class="text-sm">Proyeksi pengeluaran akhir bulanmu mencapai <strong>${formatRp(finalProjection).replace(',00','')}</strong>. Atur batas anggaran di Beranda untuk mendapatkan peringatan cerdas.</p>`;
+                insightHtml = `
+                <div class="insight-card-modern" style="border: 1px solid var(--primary); background: var(--surface); align-items: flex-start; padding: 20px; box-shadow: none; border-radius: var(--radius-md);">
+                    <div class="insight-icon-modern" style="color:var(--primary); background:rgba(59, 130, 246, 0.1); width: 44px; height: 44px; font-size: 1.5rem; border-radius: 50%;"><i class="ph-bold ph-info"></i></div>
+                    <div class="insight-text-modern" style="color: var(--text-main);">
+                        <p class="opacity-90 text-sm mb-0" style="line-height: 1.6;">Proyeksi pengeluaran akhir bulanmu mencapai <strong class="text-primary">${formatRp(finalProjection).replace(',00','')}</strong>. Atur batas anggaran di Beranda untuk mendapatkan peringatan cerdas.</p>
+                    </div>
+                </div>`;
             }
 
             document.getElementById('prediksi-insights').innerHTML = insightHtml;
-            document.getElementById('prediksi-insights').className = `mt-4 p-3 rounded-lg border ${isDanger ? 'border-danger bg-danger' : 'border-primary bg-primary-10'}`;
-            if(isDanger) document.getElementById('prediksi-insights').style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            document.getElementById('prediksi-insights').className = `mt-4 rounded-lg`;
+            document.getElementById('prediksi-insights').style.backgroundColor = 'transparent';
+            document.getElementById('prediksi-insights').style.border = 'none';
+            document.getElementById('prediksi-insights').style.padding = '0';
 
             // Draw simple projection chart
             const labels = ['Selesai (Tgl 1-'+currDate+')', 'Proyeksi (Tgl '+(currDate+1)+'-'+lastDay+')'];
@@ -745,11 +901,22 @@ const App = (() => {
         },
         
         async initRapor() {
+            const h = await Data.get('history');
             const ySel = document.getElementById('rapor-year'); const mSel = document.getElementById('rapor-month');
             if(ySel.options.length === 0) {
-                const curr = new Date(); for(let i=0; i<5; i++) ySel.add(new Option(curr.getFullYear()-i, curr.getFullYear()-i));
-                ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'].forEach((m, i) => mSel.add(new Option(m, i)));
-                mSel.value = curr.getMonth(); 
+                let uniqueYears = [...new Set(h.map(t => new Date(t.date).getFullYear()))].sort((a,b)=>b-a);
+                let uniqueMonths = [...new Set(h.map(t => new Date(t.date).getMonth()))].sort((a,b)=>a-b);
+                
+                if (uniqueYears.length === 0) uniqueYears = [new Date().getFullYear()];
+                if (uniqueMonths.length === 0) uniqueMonths = [new Date().getMonth()];
+                
+                uniqueYears.forEach(y => ySel.add(new Option(y, y)));
+                const monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+                uniqueMonths.forEach(m => mSel.add(new Option(monthNames[m], m)));
+                
+                const curr = new Date();
+                if(uniqueYears.includes(curr.getFullYear())) ySel.value = curr.getFullYear();
+                if(uniqueMonths.includes(curr.getMonth())) mSel.value = curr.getMonth();
             }
             this.renderRapor();
         },
@@ -787,8 +954,8 @@ const App = (() => {
             if(prevTotal > 0) {
                 const diff = currTotal - prevTotal;
                 const pct = Math.abs(Math.round((diff / prevTotal) * 100));
-                if(diff > 0) momHtml = `<div class="rapor-insight"><i class="ph-fill ph-trend-up text-danger"></i><div class="rapor-insight-text"><p>Pengeluaranmu <strong>Naik ${pct}%</strong> dibanding bulan lalu. Hati-hati inflasi gaya hidup!</p></div></div>`;
-                else momHtml = `<div class="rapor-insight"><i class="ph-fill ph-trend-down text-success"></i><div class="rapor-insight-text"><p>Hebat! Pengeluaranmu <strong>Turun ${pct}%</strong> dibanding bulan lalu.</p></div></div>`;
+                if(diff > 0) momHtml = `<div class="insight-card-modern"><div class="insight-icon-modern" style="color:var(--primary); background:rgba(59, 130, 246, 0.1);"><i class="ph-bold ph-trend-up"></i></div><div class="insight-text-modern">Pengeluaranmu <strong>Naik ${pct}%</strong> dibanding bulan lalu. Hati-hati inflasi gaya hidup!</div></div>`;
+                else momHtml = `<div class="insight-card-modern"><div class="insight-icon-modern" style="color:var(--primary); background:rgba(59, 130, 246, 0.1);"><i class="ph-bold ph-trend-down"></i></div><div class="insight-text-modern">Hebat! Pengeluaranmu <strong>Turun ${pct}%</strong> dibanding bulan lalu.</div></div>`;
             }
 
             // 3. Bocor Halus (Small Transactions)
@@ -796,7 +963,9 @@ const App = (() => {
             currExpList.forEach(t => { if(t.amount <= 20000) { bocorCount++; bocorTotal += t.amount; } });
             let bocorHtml = '';
             if(bocorCount >= 5) {
-                bocorHtml = `<div class="rapor-insight"><i class="ph-fill ph-drop text-warning"></i><div class="rapor-insight-text"><p><strong>Bocor Halus:</strong> Ada ${bocorCount} transaksi kecil (≤ Rp 20rb) yang kalau ditotal mencapai <strong>${formatRp(bocorTotal).replace(',00','')}</strong>. Jaga recehanmu!</p></div></div>`;
+                bocorHtml = `<div class="insight-card-modern"><div class="insight-icon-modern" style="color:var(--primary); background:rgba(59, 130, 246, 0.1);"><i class="ph-bold ph-drop"></i></div><div class="insight-text-modern"><strong>Bocor Halus:</strong> Ada ${bocorCount} transaksi kecil (≤ Rp 20rb) yang kalau ditotal mencapai <strong style="color:var(--primary)">${formatRp(bocorTotal).replace(',00','')}</strong>.</div></div>`;
+            } else {
+                bocorHtml = `<div class="insight-card-modern"><div class="insight-icon-modern" style="color:var(--primary); background:rgba(59, 130, 246, 0.1);"><i class="ph-bold ph-shield-check"></i></div><div class="insight-text-modern">Kamu cukup kebal dari <strong style="color:var(--primary)">bocor halus</strong> bulan ini. Pengeluaran recehmu terkontrol dengan baik!</div></div>`;
             }
 
             // 4. Danger Day
@@ -805,18 +974,139 @@ const App = (() => {
             let dangerDay = 0; let maxDayAmt = 0;
             for(let d in dayTotals) { if(dayTotals[d] > maxDayAmt) { maxDayAmt = dayTotals[d]; dangerDay = d; } }
             const dayNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-            const dangerHtml = `<div class="rapor-insight"><i class="ph-fill ph-calendar-x text-danger"></i><div class="rapor-insight-text"><p><strong>Hari Paling Berbahaya:</strong> Kamu paling boros di hari <strong>${dayNames[dangerDay]}</strong>. Total jajanmu di hari ini mencapai ${formatRp(maxDayAmt).replace(',00','')}.</p></div></div>`;
+            const dangerHtml = `<div class="insight-card-modern"><div class="insight-icon-modern" style="color:var(--primary); background:rgba(59, 130, 246, 0.1);"><i class="ph-bold ph-calendar-x"></i></div><div class="insight-text-modern">Kamu paling banyak menghamburkan uang di hari <strong style="color:var(--primary)">${dayNames[dangerDay]}</strong>, total menembus <strong style="color:var(--primary)">${formatRp(maxDayAmt).replace(',00','')}</strong>.</div></div>`;
+
+            // 5. Kategori Juara
+            let catTotals = {};
+            currExpList.forEach(t => { catTotals[t.category] = (catTotals[t.category] || 0) + t.amount; });
+            let maxCat = ''; let maxCatAmt = 0;
+            for(let c in catTotals) { if(catTotals[c] > maxCatAmt) { maxCatAmt = catTotals[c]; maxCat = c; } }
+            const juaraHtml = maxCatAmt > 0 ? `<div class="insight-card-modern"><div class="insight-icon-modern" style="color:var(--primary); background:rgba(59, 130, 246, 0.1);"><i class="ph-bold ph-crown"></i></div><div class="insight-text-modern">Juara pengeluaran bulan ini adalah <strong style="color:var(--primary)">${maxCat}</strong>, menghabiskan dana sebesar <strong style="color:var(--primary)">${formatRp(maxCatAmt).replace(',00','')}</strong>.</div></div>` : '';
 
             // Compile
+            const pctCapai = budget > 0 ? Math.round((currTotal / budget) * 100) : 0;
+            const balanceTitle = budget > 0 ? (currTotal > budget ? 'OVER BUDGET' : pctCapai + '% TERCAPAI') : 'TOTAL PENGELUARAN';
+            
             document.getElementById('rapor-content').innerHTML = `
-                <div class="rapor-card">
-                    <div class="rapor-title">Ringkasan AI</div>
-                    ${verdictHtml}
-                    ${momHtml}
-                    ${bocorHtml}
-                    ${dangerHtml}
+                <div class="balance-card mb-4 mt-2" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: var(--radius-lg); padding: 24px;">
+                    <div class="card-top">
+                        <span class="card-label text-white opacity-75">Sistem Analisis</span>
+                        <i class="ph-fill ph-robot text-white"></i>
+                    </div>
+                    <h2 class="card-balance text-white mt-2" style="font-size:2rem;">${balanceTitle}</h2>
+                    <div class="card-bottom mt-2">
+                        <div class="card-number text-white opacity-75">${budget > 0 ? (currTotal > budget ? 'Lebih ' + formatRp(currTotal - budget).replace(',00','') : 'Sisa ' + formatRp(budget - currTotal).replace(',00','')) : formatRp(currTotal).replace(',00','')}</div>
+                    </div>
+                    <div class="circle circle-1 floating-slow"></div>
+                    <div class="circle circle-2 floating-fast"></div>
                 </div>
+                
+                ${juaraHtml}
+                ${dangerHtml}
+                ${bocorHtml}
+                ${momHtml}
             `;
+        }
+    };
+
+    const Profile = {
+        async renderHistory() {
+            const mSel = document.getElementById('profile-hist-month');
+            const ySel = document.getElementById('profile-hist-year');
+            const curr = new Date();
+            
+            if(ySel.options.length === 0) {
+                for(let i=0; i<5; i++) ySel.add(new Option(curr.getFullYear()-i, curr.getFullYear()-i));
+                ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'].forEach((m, i) => mSel.add(new Option(m, i)));
+                mSel.value = curr.getMonth(); 
+            }
+            
+            const m = parseInt(mSel.value);
+            const y = parseInt(ySel.value);
+            const exp = (await Data.get('history')).filter(t => t.type === 'expense' && new Date(t.date).getMonth() === m && new Date(t.date).getFullYear() === y);
+            
+            if (exp.length === 0) {
+                document.getElementById('profile-hist-donut-wrapper').style.display = 'none';
+                document.getElementById('profile-hist-daily-wrapper').style.display = 'none';
+                document.getElementById('profile-hist-summary').innerHTML = '<div class="text-center p-4 text-muted"><i class="ph-fill ph-empty text-xl mb-2"></i><br>Tidak ada transaksi.</div>';
+                return;
+            }
+
+            document.getElementById('profile-hist-donut-wrapper').style.display = 'block';
+            document.getElementById('profile-hist-daily-wrapper').style.display = 'block';
+
+            const cat = {}; exp.forEach(t => { cat[t.category] = (cat[t.category] || 0) + t.amount; });
+            const totalExp = exp.reduce((a, b) => a + b.amount, 0);
+            const colors = ['#4F46E5', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+            
+            Analytics.createChart('chart-profile-hist', 'doughnut', {
+                labels: Object.keys(cat),
+                datasets: [{ data: Object.values(cat), backgroundColor: colors, borderWidth: 0, hoverOffset: 4, datalabels: { display: false } }]
+            }, { 
+                responsive: true, maintainAspectRatio: false, cutout: '70%', 
+                plugins: { 
+                    legend: { position: 'right', labels: {usePointStyle: true, color: document.body.classList.contains('dark-theme') ? '#F8FAFC' : '#64748B', font: {size: 10}} },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let val = context.raw || 0;
+                                let pct = totalExp > 0 ? ((val / totalExp) * 100).toFixed(1) + '%' : '0%';
+                                return ` ${context.label}: ${formatRp(val).replace(',00', '')} (${pct})`;
+                            }
+                        }
+                    }
+                } 
+            });
+
+            // Calc stats
+            const daysInMonth = new Date(y, m + 1, 0).getDate();
+            const dailyAvg = totalExp / daysInMonth;
+            
+            // Daily array
+            const data = new Array(daysInMonth).fill(0);
+            exp.forEach(t => { data[new Date(t.date).getDate() - 1] += t.amount; });
+            
+            const highest = Math.max(...data);
+            const lowestVal = data.some(d => d > 0) ? Math.min(...data.filter(d => d > 0)) : 0;
+
+            const summaryHtml = `
+            <div class="grid-2 mt-4 mb-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="stat-box" style="background: var(--surface); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-md); box-shadow: none;">
+                    <div class="text-xs text-muted mb-1">Total Pengeluaran</div>
+                    <div class="text-danger font-weight-bold" style="font-size: 1.1rem;">${formatRp(totalExp).replace(',00','')}</div>
+                </div>
+                <div class="stat-box" style="background: var(--surface); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-md); box-shadow: none;">
+                    <div class="text-xs text-muted mb-1">Rata-rata Harian</div>
+                    <div class="text-primary font-weight-bold" style="font-size: 1.1rem;">${formatRp(dailyAvg).replace(',00','')}</div>
+                </div>
+                <div class="stat-box" style="background: var(--surface); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-md); box-shadow: none;">
+                    <div class="text-xs text-muted mb-1">Harian Tertinggi</div>
+                    <div class="text-main font-weight-bold" style="font-size: 1.1rem;">${formatRp(highest).replace(',00','')}</div>
+                </div>
+                <div class="stat-box" style="background: var(--surface); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-md); box-shadow: none;">
+                    <div class="text-xs text-muted mb-1">Harian Terendah</div>
+                    <div class="text-success font-weight-bold" style="font-size: 1.1rem;">${formatRp(lowestVal).replace(',00','')}</div>
+                </div>
+            </div>`;
+            
+            document.getElementById('profile-hist-summary').innerHTML = summaryHtml;
+
+            // Daily Line Chart
+            const labels = Array.from({length: daysInMonth}, (_, i) => i + 1);
+            
+            const ctx = document.getElementById('chart-profile-hist-daily').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 180);
+            gradient.addColorStop(0, 'rgba(6, 182, 212, 0.4)');
+            gradient.addColorStop(1, 'rgba(6, 182, 212, 0)');
+
+            Analytics.createChart('chart-profile-hist-daily', 'line', {
+                labels: labels,
+                datasets: [{ 
+                    label: 'Harian', data: data, fill: true,
+                    backgroundColor: gradient, borderColor: '#06B6D4', borderWidth: 2, tension: 0.3,
+                    pointBackgroundColor: '#FFFFFF', pointBorderColor: '#06B6D4', pointRadius: 2, datalabels: { display: false }
+                }]
+            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: {display:false}, ticks: {font:{size:9}} }, y: { display: false, beginAtZero: true } } });
         }
     };
 
@@ -875,19 +1165,43 @@ const App = (() => {
         async refresh() {
             const w = await Data.get('wallets'); const total = w.tunai + w.bank;
             document.getElementById('home-total-balance').textContent = formatRp(total).replace(',00','');
-            const ratioTunai = total > 0 ? (w.tunai / total) * 100 : 0;
-            const wProg = document.getElementById('wallet-progress-tunai');
-            if(wProg) { wProg.style.width = `${ratioTunai}%`; document.getElementById('wallet-ratio-tunai').textContent = `${Math.round(ratioTunai)}%`; }
             
-            const wList = document.getElementById('wallet-list-full');
-            if(wList) wList.innerHTML = `<div class="activity-item mb-2"><div class="activity-left"><div class="activity-icon text-primary bg-primary-10"><i class="ph-fill ph-bank"></i></div><div><h4 class="activity-title">Bank / E-Wallet</h4></div></div><div class="activity-amount">${formatRp(w.bank).replace(',00','')}</div></div><div class="activity-item"><div class="activity-left"><div class="activity-icon text-secondary" style="background:#ECFEFF"><i class="ph-fill ph-money"></i></div><div><h4 class="activity-title">Tunai</h4></div></div><div class="activity-amount">${formatRp(w.tunai).replace(',00','')}</div></div>`;
-            
+            // Refined Asset Calculation (consider upcoming subs)
+            const subs = await Data.get('subs') || [];
+            const today = new Date();
+            const remainingSubs = subs.filter(s => s.date > today.getDate() && s.lastPaid !== `${today.getFullYear()}-${today.getMonth()}`).reduce((a,b)=>a+b.amount, 0);
+            const safeTotal = total - remainingSubs;
+
+            // Flip Card Updates
+            const bB = document.getElementById('home-bank-balance'); if(bB) bB.textContent = formatRp(w.bank).replace(',00','');
+            const cB = document.getElementById('home-cash-balance'); if(cB) cB.textContent = formatRp(w.tunai).replace(',00','');
+
+            // Detailed Wallet Cards Updates (Dompet Fisik & Batas Aman Jajan)
+            const wtTotal = document.getElementById('w-tunai-total');
+            if(wtTotal) {
+                const h = await Data.get('history') || [];
+                const expTunai = h.filter(t => t.type === 'expense' && t.wallet === 'tunai' && new Date(t.date).getMonth() === today.getMonth()).reduce((a,b)=>a+b.amount, 0);
+                const initialTunai = w.tunai + expTunai;
+                
+                wtTotal.textContent = formatRp(initialTunai).replace(',00','');
+                document.getElementById('w-tunai-spent').textContent = '- ' + formatRp(expTunai).replace(',00','');
+                document.getElementById('w-tunai-left').textContent = formatRp(w.tunai).replace(',00','');
+                
+                const pct = initialTunai > 0 ? Math.round((expTunai / initialTunai) * 100) : 0;
+                document.getElementById('w-tunai-pct').textContent = pct;
+                document.getElementById('w-tunai-bar').style.width = pct + '%';
+
+                const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+                const daysLeft = daysInMonth - today.getDate() + 1;
+                const safeDaily = safeTotal > 0 ? safeTotal / daysLeft : 0;
+                document.getElementById('w-safe-daily').textContent = formatRp(Math.floor(safeDaily)).replace(',00','');
+            }
             History.renderList('home-activity-list', await Data.get('history'), 4);
             Budget.refreshUI(); Goals.render(); Subs.render();
         }
     };
 
-    return { init: () => Core.init(), UI, Data, Auth, Story, Transactions, Budget, History, Analytics, Export, Goals, Subs, ML, Core };
+    return { init: () => Core.init(), UI, Data, Auth, Story, Transactions, Budget, History, Analytics, Export, Goals, Subs, ML, Core, Profile };
 })();
 
 document.addEventListener('DOMContentLoaded', () => App.init());
